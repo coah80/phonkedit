@@ -1,0 +1,57 @@
+{
+  "phonk1": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk1",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk2": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk2",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk3": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk3",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk4": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk4",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk5": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk5",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  }
+}

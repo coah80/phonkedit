@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "cursedphonk-renderer",
+  "version": "${version}",
+  "name": "CursedPhonk Renderer Edition",
+  "description": "YouTube Shorts Phonk Edit effect using Renderer library",
+  "authors": ["CursedPhonk Team"],
+  "contact": {
+    "sources": "https://github.com/cursedphonk/cursedphonk-renderer"
+  },
+  "license": "MIT",
+  "icon": "assets/cursedphonk/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.cursedphonk.CursedPhonkMod"],
+    "client": ["com.cursedphonk.client.CursedPhonkClient"],
+    "modmenu": ["com.cursedphonk.config.menu.ModMenuIntegration"]
+  },
+  "mixins": ["cursedphonk.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.21.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

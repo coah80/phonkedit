@@ -1,0 +1,62 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Eclipse
+*.launch
+.settings/
+.metadata
+.classpath
+.project
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# fabric
+run/
+
+# Minecraft Client
+*.log
+logs/
+crash-reports/
+usercache.json
+usernamecache.json
+options.txt
+servers.dat
+servers.dat_old
+
+# Development artifacts
+*.class
+*.jar
+!gradle-wrapper.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Personal/Local Gradle config
+gradle.properties

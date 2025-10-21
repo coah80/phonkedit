@@ -1,0 +1,10 @@
+# Gradle JVM Settings
+org.gradle.jvmargs=-Xmx4G -Xms1G -XX:MaxMetaspaceSize=1G
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.caching=true
+
+# Note: Set org.gradle.java.home to your local JDK 21 installation path
+# Example for Windows: org.gradle.java.home=C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.8.9-hotspot
+# Example for Linux/Mac: org.gradle.java.home=/usr/lib/jvm/java-21-openjdk
+# org.gradle.java.home=

@@ -1,0 +1,22 @@
+package com.cursedphonk.mixin;
+
+import com.cursedphonk.client.CursedPhonkClient;
+import net.minecraft.client.MinecraftClient;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(MinecraftClient.class)
+public class MinecraftClientMixin {
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void onRender(boolean tick, CallbackInfo ci) {
+        if (!CursedPhonkClient.isFreezeModeActive()) {
+            return;
+        }
+        
+        // TODO: Implement Renderer-based overlay here
+        // This will be replaced with Renderer API calls once we inspect the library
+    }
+}
