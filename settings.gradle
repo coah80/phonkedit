@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "cursedphonk-renderer"
+rootProject.name = "phonkedit"

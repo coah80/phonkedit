@@ -1,4 +1,4 @@
-# CursedPhonk Renderer Edition - New Implementation
+# Phonk Edit - New Implementation
 
 ## Current Status: **In Progress**
 

@@ -1,12 +1,12 @@
-# Contributing to CursedPhonk Renderer Edition
+# Contributing to Phonk Edit
 
-Thank you for considering contributing to CursedPhonk! We welcome contributions from the community.
+Thank you for considering contributing to Phonk Edit! We welcome contributions from the community.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the [issue tracker](https://github.com/cursedphonk/cursedphonk-renderer/issues) to see if the problem has already been reported. If it has, add a comment to the existing issue instead of opening a new one.
+Before creating bug reports, please check the [issue tracker](https://github.com/phonkedit/phonkedit/issues) to see if the problem has already been reported. If it has, add a comment to the existing issue instead of opening a new one.
 
 When creating a bug report, please include:
 - A clear and descriptive title

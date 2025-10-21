@@ -1,4 +1,4 @@
-package com.cursedphonk.config.menu;
+package com.phonkedit.config.menu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "id": "cursedphonk-renderer",
+  "id": "phonkedit",
   "version": "${version}",
-  "name": "CursedPhonk Renderer Edition",
+  "name": "Phonk Edit",
   "description": "YouTube Shorts Phonk Edit effect using Renderer library",
-  "authors": ["CursedPhonk Team"],
+  "authors": ["Phonk Edit Team"],
   "contact": {
-    "sources": "https://github.com/cursedphonk/cursedphonk-renderer"
+    "sources": "https://github.com/phonkedit/phonkedit"
   },
   "license": "MIT",
-  "icon": "assets/cursedphonk/icon.png",
+  "icon": "assets/phonkedit/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.cursedphonk.CursedPhonkMod"],
-    "client": ["com.cursedphonk.client.CursedPhonkClient"],
-    "modmenu": ["com.cursedphonk.config.menu.ModMenuIntegration"]
+    "main": ["com.phonkedit.PhonkEditMod"],
+    "client": ["com.phonkedit.client.PhonkEditClient"],
+    "modmenu": ["com.phonkedit.config.menu.ModMenuIntegration"]
   },
-  "mixins": ["cursedphonk.mixins.json"],
+  "mixins": ["phonkedit.mixins.json"],
   "depends": {
     "fabricloader": ">=0.15.0",
     "minecraft": "~1.21.1",

@@ -1,6 +1,6 @@
-package com.cursedphonk.mixin;
+package com.phonkedit.mixin;
 
-import com.cursedphonk.client.CursedPhonkClient;
+import com.phonkedit.client.PhonkEditClient;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

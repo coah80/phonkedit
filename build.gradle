@@ -4,8 +4,8 @@ plugins {
 }
 
 version = '2.0.0'
-group = 'com.cursedphonk'
-archivesBaseName = 'cursedphonk-renderer'
+group = 'com.phonkedit'
+archivesBaseName = 'phonkedit'
 
 repositories {
     mavenCentral()

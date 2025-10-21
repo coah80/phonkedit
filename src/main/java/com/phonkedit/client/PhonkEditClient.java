@@ -1,7 +1,7 @@
-package com.cursedphonk.client;
+package com.phonkedit.client;
 
-import com.cursedphonk.CursedPhonkMod;
-import com.cursedphonk.audio.PhonkManager;
+import com.phonkedit.PhonkEditMod;
+import com.phonkedit.audio.PhonkManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer2d;
@@ -15,17 +15,17 @@ import net.minecraft.util.Identifier;
 import java.awt.Color;
 
 @Environment(EnvType.CLIENT)
-public class CursedPhonkClient implements ClientModInitializer {
+public class PhonkEditClient implements ClientModInitializer {
     
     private static final Identifier[] SKULL_TEXTURES = {
-        Identifier.of("cursedphonk", "textures/gui/skull1.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull2.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull3.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull4.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull5.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull6.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull7.png"),
-        Identifier.of("cursedphonk", "textures/gui/skull8.png"),
+        Identifier.of("phonkedit", "textures/gui/skull1.png"),
+        Identifier.of("phonkedit", "textures/gui/skull2.png"),
+        Identifier.of("phonkedit", "textures/gui/skull3.png"),
+        Identifier.of("phonkedit", "textures/gui/skull4.png"),
+        Identifier.of("phonkedit", "textures/gui/skull5.png"),
+        Identifier.of("phonkedit", "textures/gui/skull6.png"),
+        Identifier.of("phonkedit", "textures/gui/skull7.png"),
+        Identifier.of("phonkedit", "textures/gui/skull8.png"),
     };
 
     private static boolean isFreezeModeActive = false;
@@ -35,7 +35,7 @@ public class CursedPhonkClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        CursedPhonkMod.LOGGER.info("CursedPhonk Renderer client initialized");
+        PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
         
         // Register HUD rendering using Renderer library
         RenderEvents.HUD.register(drawContext -> {
@@ -79,13 +79,13 @@ public class CursedPhonkClient implements ClientModInitializer {
         isFreezeModeActive = true;
         currentSkullIndex = (int) (Math.random() * 8);
         PhonkManager.getInstance().playRandomTrack();
-        CursedPhonkMod.LOGGER.info("Activated freeze effect");
+        PhonkEditMod.LOGGER.info("Activated freeze effect");
     }
 
     public static void endFreezeEffect() {
         isFreezeModeActive = false;
         PhonkManager.getInstance().stopAll();
-        CursedPhonkMod.LOGGER.info("Ended freeze effect");
+        PhonkEditMod.LOGGER.info("Ended freeze effect");
     }
 
     public static boolean isFreezeModeActive() {

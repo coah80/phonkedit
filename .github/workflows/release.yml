@@ -41,9 +41,9 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
-        name: CursedPhonk Renderer v${{ steps.get_version.outputs.VERSION }}
+        name: Phonk Edit v${{ steps.get_version.outputs.VERSION }}
         body: |
-          ## CursedPhonk Renderer Edition v${{ steps.get_version.outputs.VERSION }}
+          ## Phonk Edit v${{ steps.get_version.outputs.VERSION }}
           
           ### Installation
           1. Download the JAR file below

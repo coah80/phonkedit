@@ -1,4 +1,4 @@
-package com.cursedphonk;
+package com.phonkedit;
 
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -13,12 +13,12 @@ public class ModSounds {
     public static final SoundEvent PHONK5 = registerSound("phonk5");
 
     private static SoundEvent registerSound(String name) {
-        Identifier id = Identifier.of("cursedphonk", name);
+        Identifier id = Identifier.of("phonkedit", name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
     }
 
     public static void initialize() {
-        CursedPhonkMod.LOGGER.info("Registered phonk sounds");
+        PhonkEditMod.LOGGER.info("Registered phonk sounds");
     }
 
     public static SoundEvent[] getAllPhonkSounds() {

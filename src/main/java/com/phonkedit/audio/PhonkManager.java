@@ -1,7 +1,7 @@
-package com.cursedphonk.audio;
+package com.phonkedit.audio;
 
-import com.cursedphonk.CursedPhonkMod;
-import com.cursedphonk.ModSounds;
+import com.phonkedit.PhonkEditMod;
+import com.phonkedit.ModSounds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvent;
@@ -27,7 +27,7 @@ public class PhonkManager {
         client.getSoundManager().play(PositionedSoundInstance.master(selectedSound, 1.0f));
 
         isPlaying = true;
-        CursedPhonkMod.LOGGER.info("Playing phonk track");
+        PhonkEditMod.LOGGER.info("Playing phonk track");
     }
 
     public void stopAll() {
