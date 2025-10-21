@@ -1,122 +1,110 @@
 # Phonk Edit
 
-A Fabric Minecraft 1.21.1 mod that adds YouTube Shorts style phonk edit effects to your gameplay using the Renderer library.
+A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to your gameplay.
 
 ## Features
 
-- 🎵 Phonk audio system
-- 💀 Fullscreen greyscale freeze overlay with skull graphics
-- 🎮 Custom rendering effects using Renderer library
-
-## Requirements
-
-- Minecraft 1.21.1
-- Fabric Loader 0.15.0+
-- Fabric API
-- Java 17 or higher
+- 🎵 **Phonk Audio System** - Random phonk tracks play during effects
+- 💀 **Freeze Overlay** - Fullscreen greyscale effect with animated skull graphics
+- 🎮 **Custom Rendering** - Powered by the Renderer library for smooth visuals
+- ⚡ **Performance Optimized** - Lightweight and efficient
 
 ## Installation
 
-1. Download the latest release from the [Releases](https://github.com/coah80/phonkedit/releases) page
-2. Place the mod JAR file in your `.minecraft/mods` folder
-3. Launch Minecraft with Fabric
+### Requirements
+
+- **Minecraft** 1.21.1
+- **Fabric Loader** 0.15.0 or higher
+- **Fabric API** (latest version)
+- **Java** 17 or higher
+
+### Steps
+
+1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.1
+2. Download [Fabric API](https://modrinth.com/mod/fabric-api) and place it in your `mods` folder
+3. Download the latest **Phonk Edit** release from [here](https://github.com/coah80/phonkedit/releases)
+4. Place the `phonkedit-*.jar` file in your `.minecraft/mods` folder
+5. Launch Minecraft with the Fabric profile
+
+## Configuration
+
+Configuration file is located at `.minecraft/config/phonkedit.json`
+
+```json
+{
+  "enablePhonkEffect": true,
+  "triggerChance": 0.10,
+  "effectDuration": 3000
+}
+```
+
+- `enablePhonkEffect` - Enable/disable the mod (default: `true`)
+- `triggerChance` - Chance of effect triggering (0.0-1.0, default: `0.10`)
+- `effectDuration` - Effect duration in milliseconds (default: `3000`)
 
 ## Building from Source
 
 ### Prerequisites
 
-- Java 21 (JDK)
-- Git
+- **Java Development Kit (JDK) 21**
+- **Git**
 
-### Build Steps
+### Windows
 
-```bash
-# Clone the repository
+```powershell
 git clone https://github.com/coah80/phonkedit.git
 cd phonkedit
+.\gradlew.bat build
+```
 
-# Build the mod (Windows)
-gradlew.bat build
+### Linux/macOS
 
-# Build the mod (Linux/Mac)
+```bash
+git clone https://github.com/coah80/phonkedit.git
+cd phonkedit
 ./gradlew build
 ```
 
 The compiled JAR will be in `build/libs/`
 
-## Development
+### Development
 
-### Running the Client
+To run the mod in a development environment:
 
-```bash
+```powershell
 # Windows
-gradlew.bat runClient
+.\gradlew.bat runClient
 
-# Linux/Mac
+# Linux/macOS
 ./gradlew runClient
 ```
 
-## Contributing
+## Troubleshooting
 
-Thank you for considering contributing! Here's how you can help:
+### Mod doesn't load
+- Verify you have Fabric Loader and Fabric API installed
+- Check that you're using Minecraft 1.21.1
+- Ensure Java 17+ is installed
 
-### Reporting Bugs
+### No sound plays
+- Check your Minecraft sound settings
+- Verify the mod's audio files are present in the JAR
 
-Before creating bug reports, check the [issue tracker](https://github.com/coah80/phonkedit/issues) to see if it's already reported.
+### Performance issues
+- Lower the `triggerChance` in the config
+- Reduce `effectDuration` for shorter effects
+- Check for conflicts with other rendering mods
 
-Include in your bug report:
-- Clear description and steps to reproduce
-- Expected vs actual behavior
-- Screenshots/videos if applicable
-- Minecraft version, mod version, and other mods installed
-- Crash reports or logs if applicable
+## Support
 
-### Suggesting Features
-
-Feature requests are welcome! Include:
-- Clear description of the feature
-- Use cases and benefits
-- Any relevant examples or mockups
-
-### Pull Requests
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Test thoroughly in Minecraft
-5. Commit with clear messages (`git commit -m 'Add amazing feature'`)
-6. Push to your branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-**Guidelines:**
-- Follow existing code style
-- Comment complex logic
-- Update documentation as needed
-- Test in Minecraft client
-- Include screenshots/videos for visual changes
-
-## Creating a Release
-
-To create a new release:
-
-```bash
-# Commit your changes
-git add .
-git commit -m "Release v2.0.0"
-
-# Create and push tag
-git tag v2.0.0
-git push origin main
-git push origin v2.0.0
-```
-
-GitHub Actions will automatically build and create the release with JAR files attached.
+- **Issues & Bugs:** [GitHub Issues](https://github.com/coah80/phonkedit/issues)
+- **Feature Requests:** [GitHub Issues](https://github.com/coah80/phonkedit/issues)
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License - See [LICENSE](LICENSE) file for details
 
 ## Credits
 
 - Built with [Fabric](https://fabricmc.net/)
-- Uses [Renderer library](https://github.com/0x150/renderer) by 0x150
+- Powered by [Renderer](https://github.com/0x150/renderer) by 0x150
