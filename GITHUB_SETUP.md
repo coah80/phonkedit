@@ -39,7 +39,7 @@ git commit -m "Initial commit - Phonk Edit v2.0.0"
 
 ### Step 4: Create GitHub Repository
 1. Go to https://github.com/new
-2. Repository name: `phonk-edit`
+2. Repository name: `phonkedit`
 3. Description: `YouTube Shorts Phonk Edit effect for Minecraft 1.21.1 using Renderer library`
 4. Choose Public (recommended) or Private
 5. **Do NOT** check "Add a README file" (we already have one)
@@ -51,7 +51,7 @@ git commit -m "Initial commit - Phonk Edit v2.0.0"
 After creating the repository, GitHub will show you commands. Run these:
 
 ```powershell
-git remote add origin https://github.com/coah80/phonk-edit.git
+git remote add origin https://github.com/coah80/phonkedit.git
 git branch -M main
 git push -u origin main
 ```

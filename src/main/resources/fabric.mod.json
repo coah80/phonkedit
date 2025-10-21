@@ -6,7 +6,7 @@
   "description": "YouTube Shorts Phonk Edit effect using Renderer library",
   "authors": ["Phonk Edit Team"],
   "contact": {
-    "sources": "https://github.com/coah80/phonk-edit"
+    "sources": "https://github.com/coah80/phonkedit"
   },
   "license": "MIT",
   "icon": "assets/phonkedit/icon.png",
