@@ -17,7 +17,7 @@ A Fabric Minecraft 1.20.1 mod that adds YouTube Shorts style phonk edit effects 
 
 ## Installation
 
-1. Download the latest release from the [Releases](https://github.com/phonkedit/phonkedit/releases) page
+1. Download the latest release from the [Releases](https://github.com/coah80/phonkedit/releases) page
 2. Place the mod JAR file in your `.minecraft/mods` folder
 3. Launch Minecraft with Fabric
 
@@ -32,7 +32,7 @@ A Fabric Minecraft 1.20.1 mod that adds YouTube Shorts style phonk edit effects 
 
 ```bash
 # Clone the repository
-git clone https://github.com/phonkedit/phonkedit.git
+git clone https://github.com/coah80/phonkedit.git
 cd phonkedit
 
 # Build the mod (Windows)
@@ -62,7 +62,7 @@ This project is licensed under the MIT License.
 
 ## Issues & Support
 
-Found a bug or have a feature request? Please open an issue on our [Issue Tracker](https://github.com/phonkedit/phonkedit/issues).
+Found a bug or have a feature request? Please open an issue on our [Issue Tracker](https://github.com/coah80/phonkedit/issues).
 
 ## Contributing
 
