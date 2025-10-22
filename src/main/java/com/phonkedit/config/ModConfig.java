@@ -22,10 +22,13 @@ public class ModConfig {
 
     // Additional triggers
     public boolean triggerOnBlockBreak = true;
+    public boolean triggerOnBlockPlace = true;
     public boolean triggerOnEntityHit = true;
     public boolean triggerOnDamageTaken = true;
     public boolean triggerOnLowHealth = true;
     public float lowHealthThreshold = 6.0f; // 3 hearts
+    public boolean triggerOnAirTime = true;
+    public double airTimeThresholdSeconds = 1.3;
 
     // Safety/"pause" options
     public boolean lockMouseDuringEffect = true;
@@ -43,6 +46,8 @@ public class ModConfig {
     public boolean renderSkullOverlay = true;
     public boolean skullShakeEnabled = true;
     public boolean skullBlurEnabled = true;
+    public double skullBlurIntensity = 5.0; // Multiplier for blur spread/opacity (1.0 = previous default)
+    public double skullBlurEasePower = 1.5; // Higher values make the blur fade out faster
 
     // Misc state
     public boolean modMenuDisclaimerShown = false;
@@ -79,9 +84,17 @@ public class ModConfig {
 
         phonkPitchMin = min;
         phonkPitchMax = max;
+
+        skullBlurIntensity = clamp(skullBlurIntensity, 0.0, 5.0);
+        skullBlurEasePower = clamp(skullBlurEasePower, 0.1, 5.0);
+        airTimeThresholdSeconds = clamp(airTimeThresholdSeconds, 0.1, 10.0);
     }
 
     private static double clampPitch(double value) {
         return Math.max(0.5, Math.min(2.0, value));
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

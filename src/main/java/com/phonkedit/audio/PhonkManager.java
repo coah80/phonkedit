@@ -16,6 +16,7 @@ public class PhonkManager {
     private final Random random = new Random();
     private boolean isPlaying = false;
     private SoundInstance currentInstance = null;
+    private SoundEvent currentSoundEvent = null;
 
     public static PhonkManager getInstance() {
         return INSTANCE;
@@ -25,7 +26,8 @@ public class PhonkManager {
         MinecraftClient client = MinecraftClient.getInstance();
         
         SoundEvent[] sounds = ModSounds.getAllPhonkSounds();
-        SoundEvent selectedSound = sounds[random.nextInt(sounds.length)];
+    SoundEvent selectedSound = sounds[random.nextInt(sounds.length)];
+    currentSoundEvent = selectedSound;
 
         double minPitch = ModConfig.INSTANCE.phonkPitchMin;
         double maxPitch = ModConfig.INSTANCE.phonkPitchMax;
@@ -56,6 +58,7 @@ public class PhonkManager {
             client.getSoundManager().stop(currentInstance);
             currentInstance = null;
         }
+        currentSoundEvent = null;
     }
 
     public boolean isPlaying() {
@@ -66,5 +69,9 @@ public class PhonkManager {
         if (currentInstance == null) return false;
         MinecraftClient client = MinecraftClient.getInstance();
         return client.getSoundManager().isPlaying(currentInstance);
+    }
+
+    public SoundEvent getCurrentSoundEvent() {
+        return currentSoundEvent;
     }
 }

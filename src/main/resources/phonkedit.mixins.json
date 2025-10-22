@@ -12,7 +12,8 @@
     "MouseMixin",
     "ClientPlayerEntityMixin",
     "ClientPlayerInteractionManagerMixin",
-    "CameraMixin"
+    "CameraMixin",
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

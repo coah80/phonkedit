@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "phonkedit",
   "version": "${version}",
-  "name": "Phonk Edit",
-  "description": "YouTube Shorts Phonk Edit effect using Renderer library",
-  "authors": ["Phonk Edit Team"],
+  "name": "YouTube Shorts Phonk Edit",
+  "description": "youtube shorts phonk skull edit thing but in minecraft lol\n\nGod why did i spend so much time on this.",
+  "authors": ["coah"],
   "contact": {
     "sources": "https://github.com/coah80/phonkedit"
   },

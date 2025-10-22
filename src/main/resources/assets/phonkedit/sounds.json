@@ -53,5 +53,82 @@
         "stream": true
       }
     ]
+  },
+  "phonk6": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk6",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk7": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk7",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk8": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk8",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk9": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk9",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk10": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk10",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk11": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk11",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk12": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk12",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
   }
 }
