@@ -25,17 +25,29 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.sound.SoundEvent;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 @Environment(EnvType.CLIENT)
 public class PhonkEditClient implements ClientModInitializer {
@@ -63,17 +75,21 @@ public class PhonkEditClient implements ClientModInitializer {
     };
     private static final Identifier SPECIAL_SKULL_PHONK6 = Identifier.of("phonkedit", "textures/gui/skull20.png");
     private static final List<Identifier> SKULL_TEXTURES = new ArrayList<>();
-    private static final List<Identifier> USER_SKULL_TEXTURE_IDS = new ArrayList<>();
-    private static final Path USER_IMAGES_DIR = FabricLoader.getInstance()
+    private static final List<CustomTexture> USER_SKULL_TEXTURES = new ArrayList<>();
+    private static final Path USER_CONFIG_DIR = FabricLoader.getInstance()
         .getConfigDir()
-        .resolve("phonkedit")
-        .resolve("images");
+        .resolve("phonkedit");
+    private static final Path USER_IMAGES_DIR = USER_CONFIG_DIR.resolve("images");
+    private static final String DEFAULT_EXPORT_MARKER = ".defaults_copied";
+    private static final Set<String> SUPPORTED_IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "gif", "bmp", "wbmp", "tif", "tiff");
+    // Reserved for future flexibility; currently we treat only exact 'skull20' as special
+    // private static final Set<String> SPECIAL_NAME_HINTS = Set.of("skull20");
     private static final int SKULL_TEXTURE_SIZE = 256;
     private static final int SKULL_RENDER_SIZE = 256;
     private static final float SKULL_RENDER_SCALE = 0.4f;
     private static int userSkullIdCounter = 0;
     private static int specialSkullIdCounter = 0;
-    private static Identifier customSpecialSkullId = null;
+    private static CustomTexture customSpecialSkull = null;
     private static Identifier currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
     private static Identifier overrideSkullTexture = null;
 
@@ -92,11 +108,11 @@ public class PhonkEditClient implements ClientModInitializer {
         clearUserSkullTextures(textureManager);
 
         SKULL_TEXTURES.clear();
-        Collections.addAll(SKULL_TEXTURES, BUILTIN_SKULL_TEXTURES);
         currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
         overrideSkullTexture = null;
 
         try {
+            Files.createDirectories(USER_CONFIG_DIR);
             Files.createDirectories(USER_IMAGES_DIR);
         } catch (IOException e) {
             PhonkEditMod.LOGGER.error("Unable to prepare skull image directory {}", USER_IMAGES_DIR, e);
@@ -104,38 +120,68 @@ public class PhonkEditClient implements ClientModInitializer {
             return;
         }
 
-        exportBuiltinSkulls(resourceManager);
-        exportSpecialSkull(resourceManager);
+        exportDefaultImagesIfNeeded(resourceManager);
         loadCustomSkulls(textureManager);
 
         if (SKULL_TEXTURES.isEmpty()) {
             Collections.addAll(SKULL_TEXTURES, BUILTIN_SKULL_TEXTURES);
         }
+        updateSpecialSkullSelection(resourceManager);
 
         currentSkullIndex = Math.min(currentSkullIndex, Math.max(0, SKULL_TEXTURES.size() - 1));
 
-        int customCount = Math.max(0, SKULL_TEXTURES.size() - BUILTIN_SKULL_TEXTURES.length);
-        PhonkEditMod.LOGGER.info("Loaded {} skull textures ({} custom)", SKULL_TEXTURES.size(), customCount);
-        if (customCount > 0) {
+        int userTextureCount = USER_SKULL_TEXTURES.size() + (customSpecialSkull != null ? 1 : 0);
+        int totalTextures = SKULL_TEXTURES.size() + (customSpecialSkull != null ? 1 : 0);
+        PhonkEditMod.LOGGER.info("Loaded {} skull textures ({} from user directory)", totalTextures, userTextureCount);
+        if (userTextureCount > 0) {
             PhonkEditMod.LOGGER.info("Custom skull directory: {}", USER_IMAGES_DIR.toAbsolutePath());
         }
     }
 
     private static void clearUserSkullTextures(TextureManager textureManager) {
-        if (!USER_SKULL_TEXTURE_IDS.isEmpty()) {
-            for (Identifier id : USER_SKULL_TEXTURE_IDS) {
-                textureManager.destroyTexture(id);
+        if (!USER_SKULL_TEXTURES.isEmpty()) {
+            for (CustomTexture texture : USER_SKULL_TEXTURES) {
+                texture.destroy(textureManager);
             }
-            USER_SKULL_TEXTURE_IDS.clear();
+            USER_SKULL_TEXTURES.clear();
         }
-        if (customSpecialSkullId != null) {
-            textureManager.destroyTexture(customSpecialSkullId);
-            customSpecialSkullId = null;
+        if (customSpecialSkull != null) {
+            customSpecialSkull.destroy(textureManager);
+            customSpecialSkull = null;
         }
         currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
         userSkullIdCounter = 0;
         specialSkullIdCounter = 0;
         overrideSkullTexture = null;
+    }
+
+    private static void exportDefaultImagesIfNeeded(ResourceManager resourceManager) {
+        Path markerInConfig = USER_CONFIG_DIR.resolve(DEFAULT_EXPORT_MARKER);
+        Path markerInImages = USER_IMAGES_DIR.resolve(DEFAULT_EXPORT_MARKER); // legacy location used by earlier builds
+        if (Files.exists(markerInConfig) || Files.exists(markerInImages)) {
+            return;
+        }
+        exportBuiltinSkulls(resourceManager);
+        exportSpecialSkull(resourceManager);
+        try {
+            Files.createFile(markerInConfig);
+        } catch (IOException e) {
+            PhonkEditMod.LOGGER.debug("Unable to record default export marker {}: {}", markerInConfig, e.getMessage());
+        }
+    }
+
+    private static void updateSpecialSkullSelection(ResourceManager resourceManager) {
+        if (customSpecialSkull != null) {
+            currentSpecialSkullTexture = customSpecialSkull.id();
+            return;
+        }
+        boolean hasBuiltinSpecial = resourceManager != null && resourceManager.getResource(SPECIAL_SKULL_PHONK6).isPresent();
+        if (hasBuiltinSpecial) {
+            currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
+        } else {
+            // No special skull available; don't substitute a random one. Phonk6 will run without special overlay.
+            currentSpecialSkullTexture = null;
+        }
     }
 
     private static void exportBuiltinSkulls(ResourceManager resourceManager) {
@@ -175,13 +221,14 @@ public class PhonkEditClient implements ClientModInitializer {
             paths.filter(Files::isRegularFile)
                     .filter(path -> {
                         String lower = path.getFileName().toString().toLowerCase(Locale.ROOT);
-                        return lower.endsWith(".png");
+                        String extension = getFileExtension(lower);
+                        return extension != null && SUPPORTED_IMAGE_EXTENSIONS.contains(extension);
                     })
                     .sorted()
                     .forEach(path -> {
-                        String baseName = stripExtension(path.getFileName().toString()).toLowerCase(Locale.ROOT);
-                        boolean special = baseName.equals("skull20");
-                        if (special && customSpecialSkullId != null) {
+                        String baseName = stripExtension(path.getFileName().toString());
+                        boolean special = isSpecialName(baseName);
+                        if (special && customSpecialSkull != null) {
                             return;
                         }
                         registerCustomSkull(path, textureManager, special);
@@ -192,31 +239,427 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     private static void registerCustomSkull(Path imagePath, TextureManager textureManager, boolean special) {
-        try (NativeImage source = NativeImage.read(Files.newInputStream(imagePath))) {
-            NativeImage scaled = scaleToSquare(source, SKULL_TEXTURE_SIZE);
-            NativeImageBackedTexture texture = new NativeImageBackedTexture(scaled);
-            String baseName = stripExtension(imagePath.getFileName().toString());
-            String sanitized = sanitizeResourceName(baseName);
-            Identifier id;
-            if (special) {
-                String texturePath = "user/skull_special/" + sanitized + "_" + (specialSkullIdCounter++);
-                id = Identifier.of(PhonkEditMod.MOD_ID, texturePath);
-            } else {
-                String texturePath = "user/skull/" + sanitized + "_" + (userSkullIdCounter++);
-                id = Identifier.of(PhonkEditMod.MOD_ID, texturePath);
-            }
-            textureManager.registerTexture(id, texture);
-            if (special) {
-                customSpecialSkullId = id;
-                currentSpecialSkullTexture = id;
-                PhonkEditMod.LOGGER.info("Registered custom special skull texture {} for phonk6", imagePath.getFileName());
-            } else {
-                USER_SKULL_TEXTURE_IDS.add(id);
-                SKULL_TEXTURES.add(id);
-            }
+        LoadedImageData imageData;
+        try {
+            imageData = loadCustomImageData(imagePath);
         } catch (Exception e) {
             PhonkEditMod.LOGGER.warn("Skipping custom skull image {}: {}", imagePath.getFileName(), e.getMessage());
+            return;
         }
+
+        List<NativeImage> frames = new ArrayList<>(imageData.frames());
+        List<Integer> frameDurations = new ArrayList<>(imageData.frameDurations());
+        boolean animated = frames.size() > 1;
+
+        String baseName = stripExtension(imagePath.getFileName().toString());
+        String sanitized = sanitizeResourceName(baseName);
+        int suffix = special ? specialSkullIdCounter : userSkullIdCounter;
+        String texturePath = special
+            ? "user/skull_special/" + sanitized + "_" + suffix
+            : "user/skull/" + sanitized + "_" + suffix;
+        Identifier id = Identifier.of(PhonkEditMod.MOD_ID, texturePath);
+
+        NativeImageBackedTexture texture = null;
+        GifAnimation animation = null;
+
+        try {
+            NativeImage initialFrameCopy = copyImage(frames.get(0));
+            texture = new NativeImageBackedTexture(initialFrameCopy);
+            textureManager.registerTexture(id, texture);
+            texture.upload();
+
+            if (animated) {
+                animation = new GifAnimation(frames, frameDurations);
+                animation.reset(texture);
+            } else {
+                for (NativeImage frame : frames) {
+                    frame.close();
+                }
+                frames.clear();
+            }
+
+            if (special) {
+                specialSkullIdCounter++;
+            } else {
+                userSkullIdCounter++;
+            }
+
+            CustomTexture handle = new CustomTexture(id, texture, animation, imagePath);
+            if (special) {
+                customSpecialSkull = handle;
+                currentSpecialSkullTexture = id;
+                PhonkEditMod.LOGGER.info("Registered custom special skull texture {}", imagePath.getFileName());
+            } else {
+                USER_SKULL_TEXTURES.add(handle);
+                SKULL_TEXTURES.add(id);
+                PhonkEditMod.LOGGER.debug("Registered custom skull texture {}", imagePath.getFileName());
+            }
+        } catch (Exception e) {
+            if (animation != null) {
+                animation.close();
+            } else if (!frames.isEmpty()) {
+                for (NativeImage frame : frames) {
+                    try {
+                        frame.close();
+                    } catch (Exception ignored) {
+                        // Ignored
+                    }
+                }
+                frames.clear();
+            }
+
+            if (texture != null) {
+                textureManager.destroyTexture(id);
+                try {
+                    texture.close();
+                } catch (Exception ignored) {
+                    // Ignored
+                }
+            }
+
+            PhonkEditMod.LOGGER.warn("Skipping custom skull image {}: {}", imagePath.getFileName(), e.getMessage());
+        }
+    }
+
+    private static String getFileExtension(String filename) {
+        int dot = filename.lastIndexOf('.');
+        if (dot < 0 || dot == filename.length() - 1) {
+            return null;
+        }
+        return filename.substring(dot + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean isSpecialName(String name) {
+        String normalized = name.toLowerCase(Locale.ROOT);
+        return normalized.equals("skull20");
+    }
+
+    private static LoadedImageData loadCustomImageData(Path imagePath) throws IOException {
+        String filename = imagePath.getFileName().toString();
+        String extension = getFileExtension(filename);
+        if ("gif".equals(extension)) {
+            return loadGif(imagePath);
+        }
+        try (InputStream inputStream = Files.newInputStream(imagePath)) {
+            BufferedImage bufferedImage = ImageIO.read(inputStream);
+            if (bufferedImage == null) {
+                throw new IOException("Unsupported image format");
+            }
+            NativeImage nativeImage = bufferedToNative(bufferedImage);
+            try {
+                NativeImage scaled = scaleToSquare(nativeImage, SKULL_TEXTURE_SIZE);
+                return new LoadedImageData(Collections.singletonList(scaled), Collections.singletonList(Integer.MAX_VALUE));
+            } finally {
+                nativeImage.close();
+            }
+        }
+    }
+
+    private static LoadedImageData loadGif(Path imagePath) throws IOException {
+        Iterator<ImageReader> readers = ImageIO.getImageReadersBySuffix("gif");
+        if (!readers.hasNext()) {
+            throw new IOException("GIF support is unavailable");
+        }
+        ImageReader reader = readers.next();
+        try (ImageInputStream stream = ImageIO.createImageInputStream(Files.newInputStream(imagePath))) {
+            reader.setInput(stream, false, false);
+
+            // Determine logical screen (canvas) size
+            int canvasW = -1, canvasH = -1;
+            try {
+                IIOMetadata streamMeta = reader.getStreamMetadata();
+                int[] wh = parseGifLogicalScreenSize(streamMeta);
+                canvasW = wh[0];
+                canvasH = wh[1];
+            } catch (Exception ignored) { }
+
+            int frameCount = Math.max(1, reader.getNumImages(true));
+            // Fallback to first frame size if logical screen is unknown
+            if (canvasW <= 0 || canvasH <= 0) {
+                BufferedImage first = reader.read(0);
+                canvasW = first.getWidth();
+                canvasH = first.getHeight();
+            }
+
+            BufferedImage canvas = new BufferedImage(canvasW, canvasH, BufferedImage.TYPE_INT_ARGB);
+            java.awt.Graphics2D g = canvas.createGraphics();
+            g.setComposite(java.awt.AlphaComposite.SrcOver);
+
+            List<NativeImage> frames = new ArrayList<>(frameCount);
+            List<Integer> durations = new ArrayList<>(frameCount);
+
+            for (int i = 0; i < frameCount; i++) {
+                BufferedImage frameImg = reader.read(i);
+                IIOMetadata meta = reader.getImageMetadata(i);
+                int delay = extractGifDelay(meta);
+                GifFrameInfo info = parseGifFrameInfo(meta, frameImg);
+
+                // Draw this frame onto the persistent canvas at its offset
+                g.drawImage(frameImg, info.left, info.top, null);
+
+                // Snapshot composed result for this frame
+                BufferedImage snapshot = new BufferedImage(canvasW, canvasH, BufferedImage.TYPE_INT_ARGB);
+                java.awt.Graphics2D g2 = snapshot.createGraphics();
+                g2.drawImage(canvas, 0, 0, null);
+                g2.dispose();
+
+                // Convert to NativeImage and scale to skull size
+                NativeImage nativeComposed = bufferedToNative(snapshot);
+                try {
+                    NativeImage scaled = scaleToSquare(nativeComposed, SKULL_TEXTURE_SIZE);
+                    frames.add(scaled);
+                } finally {
+                    nativeComposed.close();
+                }
+                durations.add(delay);
+
+                // Apply disposal
+                if ("restoreToBackgroundColor".equals(info.disposal)) {
+                    // Clear the area of this frame for the next composite
+                    java.awt.Composite old = g.getComposite();
+                    g.setComposite(java.awt.AlphaComposite.Clear);
+                    g.fillRect(info.left, info.top, info.width, info.height);
+                    g.setComposite(old);
+                } else if ("restoreToPrevious".equals(info.disposal)) {
+                    // As a simple fallback, also clear (many GIFs still look fine)
+                    java.awt.Composite old = g.getComposite();
+                    g.setComposite(java.awt.AlphaComposite.Clear);
+                    g.fillRect(info.left, info.top, info.width, info.height);
+                    g.setComposite(old);
+                } // 'none' or 'doNotDispose' keeps canvas as-is
+            }
+
+            g.dispose();
+
+            if (frames.isEmpty()) {
+                throw new IOException("GIF contains no readable frames");
+            }
+            while (durations.size() < frames.size()) {
+                durations.add(100);
+            }
+            return new LoadedImageData(frames, durations);
+        } finally {
+            reader.dispose();
+        }
+    }
+
+    private static int extractGifDelay(IIOMetadata metadata) {
+        int delayCs = 10;
+        if (metadata != null) {
+            try {
+                String format = metadata.getNativeMetadataFormatName();
+                Node tree = metadata.getAsTree(format);
+                int parsed = findGifDelay(tree);
+                if (parsed >= 0) {
+                    delayCs = parsed;
+                }
+            } catch (Exception ignored) {
+                // Ignored
+            }
+        }
+        int delayMs = Math.max(1, delayCs) * 10;
+        return Math.max(20, delayMs);
+    }
+
+    private static int findGifDelay(Node node) {
+        if (node == null) {
+            return -1;
+        }
+        if ("GraphicControlExtension".equals(node.getNodeName())) {
+            NamedNodeMap attributes = node.getAttributes();
+            if (attributes != null) {
+                Node delayNode = attributes.getNamedItem("delayTime");
+                if (delayNode != null) {
+                    try {
+                        return Integer.parseInt(delayNode.getNodeValue());
+                    } catch (NumberFormatException ignored) {
+                        // Ignored
+                    }
+                }
+            }
+        }
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+            int delay = findGifDelay(child);
+            if (delay >= 0) {
+                return delay;
+            }
+        }
+        return -1;
+    }
+
+    private static int[] parseGifLogicalScreenSize(IIOMetadata streamMeta) {
+        int w = -1, h = -1;
+        if (streamMeta != null) {
+            try {
+                String format = streamMeta.getNativeMetadataFormatName();
+                Node root = streamMeta.getAsTree(format);
+                for (Node n = root.getFirstChild(); n != null; n = n.getNextSibling()) {
+                    if ("LogicalScreenDescriptor".equals(n.getNodeName())) {
+                        NamedNodeMap at = n.getAttributes();
+                        w = parseIntAttr(at, "logicalScreenWidth", -1);
+                        h = parseIntAttr(at, "logicalScreenHeight", -1);
+                        break;
+                    }
+                }
+            } catch (Exception ignored) { }
+        }
+        return new int[] { w, h };
+    }
+
+    private static class GifFrameInfo {
+        final int left, top, width, height;
+        final String disposal;
+        GifFrameInfo(int left, int top, int width, int height, String disposal) {
+            this.left = left; this.top = top; this.width = width; this.height = height; this.disposal = disposal;
+        }
+    }
+
+    private static GifFrameInfo parseGifFrameInfo(IIOMetadata meta, BufferedImage img) {
+        int left = 0, top = 0, w = img.getWidth(), h = img.getHeight();
+        String disposal = "none";
+        if (meta != null) {
+            try {
+                String format = meta.getNativeMetadataFormatName();
+                Node root = meta.getAsTree(format);
+                for (Node n = root.getFirstChild(); n != null; n = n.getNextSibling()) {
+                    if ("ImageDescriptor".equals(n.getNodeName())) {
+                        NamedNodeMap at = n.getAttributes();
+                        left = parseIntAttr(at, "imageLeftPosition", left);
+                        top = parseIntAttr(at, "imageTopPosition", top);
+                        w = parseIntAttr(at, "imageWidth", w);
+                        h = parseIntAttr(at, "imageHeight", h);
+                    } else if ("GraphicControlExtension".equals(n.getNodeName())) {
+                        NamedNodeMap at = n.getAttributes();
+                        Node disp = at.getNamedItem("disposalMethod");
+                        if (disp != null) disposal = disp.getNodeValue();
+                    }
+                }
+            } catch (Exception ignored) { }
+        }
+        return new GifFrameInfo(left, top, w, h, disposal);
+    }
+
+    private static int parseIntAttr(NamedNodeMap at, String name, int def) {
+        if (at == null) return def;
+        Node n = at.getNamedItem(name);
+        if (n == null) return def;
+        try { return Integer.parseInt(n.getNodeValue()); } catch (Exception e) { return def; }
+    }
+
+    private static NativeImage bufferedToNative(BufferedImage image) {
+        NativeImage nativeImage = new NativeImage(image.getWidth(), image.getHeight(), true);
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int argb = image.getRGB(x, y);
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+                int abgr = (a << 24) | (b << 16) | (g << 8) | r;
+                nativeImage.setColor(x, y, abgr);
+            }
+        }
+        return nativeImage;
+    }
+
+    private static NativeImage copyImage(NativeImage source) {
+        NativeImage copy = new NativeImage(source.getWidth(), source.getHeight(), true);
+        copyImageData(source, copy);
+        return copy;
+    }
+
+    private static void copyImageData(NativeImage source, NativeImage target) {
+        int width = Math.min(source.getWidth(), target.getWidth());
+        int height = Math.min(source.getHeight(), target.getHeight());
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                target.setColor(x, y, source.getColor(x, y));
+            }
+        }
+    }
+
+    private static final class LoadedImageData {
+        private final List<NativeImage> frames;
+        private final List<Integer> frameDurations;
+
+        private LoadedImageData(List<NativeImage> frames, List<Integer> durations) {
+            if (frames == null || frames.isEmpty()) {
+                throw new IllegalArgumentException("frames must not be empty");
+            }
+            this.frames = List.copyOf(frames);
+            if (durations == null || durations.isEmpty()) {
+                durations = Collections.nCopies(this.frames.size(), 100);
+            } else if (durations.size() < this.frames.size()) {
+                List<Integer> copy = new ArrayList<>(durations);
+                while (copy.size() < this.frames.size()) {
+                    copy.add(100);
+                }
+                durations = copy;
+            }
+            this.frameDurations = List.copyOf(durations);
+        }
+
+        private List<NativeImage> frames() {
+            return frames;
+        }
+
+        private List<Integer> frameDurations() {
+            return frameDurations;
+        }
+    }
+
+    private static void tickCustomTextureAnimations() {
+        if (!isFreezeModeActive) {
+            return;
+        }
+        Identifier activeTexture = overrideSkullTexture != null ? overrideSkullTexture : getCurrentSkullTexture();
+        CustomTexture active = findCustomTexture(activeTexture);
+        if (active != null) {
+            active.tick();
+        }
+    }
+
+    private static CustomTexture findCustomTexture(Identifier textureId) {
+        if (textureId == null) {
+            return null;
+        }
+        if (customSpecialSkull != null && customSpecialSkull.id().equals(textureId)) {
+            return customSpecialSkull;
+        }
+        for (CustomTexture texture : USER_SKULL_TEXTURES) {
+            if (texture.id().equals(textureId)) {
+                return texture;
+            }
+        }
+        return null;
+    }
+
+    private static void resetAnimationFor(Identifier textureId) {
+        CustomTexture texture = findCustomTexture(textureId);
+        if (texture != null) {
+            texture.resetAnimation();
+        }
+    }
+
+    private static Identifier resolveSpecialSkullTexture() {
+        if (currentSpecialSkullTexture != null) {
+            return currentSpecialSkullTexture;
+        }
+        if (customSpecialSkull != null) {
+            return customSpecialSkull.id();
+        }
+        if (!USER_SKULL_TEXTURES.isEmpty()) {
+            CustomTexture random = USER_SKULL_TEXTURES.get((int) (Math.random() * USER_SKULL_TEXTURES.size()));
+            return random.id();
+        }
+        if (!SKULL_TEXTURES.isEmpty()) {
+            return SKULL_TEXTURES.get((int) (Math.random() * SKULL_TEXTURES.size()));
+        }
+        return BUILTIN_SKULL_TEXTURES.length > 0 ? BUILTIN_SKULL_TEXTURES[0] : null;
+    }
+
+    private static boolean isSpecialTrack(SoundEvent event) {
+        return event == ModSounds.PHONK6;
     }
 
     private static NativeImage scaleToSquare(NativeImage source, int size) {
@@ -279,6 +722,9 @@ public class PhonkEditClient implements ClientModInitializer {
     private static final long WORLD_JOIN_COOLDOWN = 3000;
     private static final long EFFECT_DELAY = 300; // 0.3 second delay
     private static long pendingEffectTime = 0;
+    // Allow a short grace period for streamed audio to actually begin playing before auto-ending
+    private static final long TRACK_PLAY_GRACE_MS = 600;
+    private static long trackPlayWaitDeadline = 0;
     
     private static long freezeActivationTime = 0;
     private static final long SHAKE_DURATION = 500;
@@ -314,6 +760,7 @@ public class PhonkEditClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            tickCustomTextureAnimations();
             // Check for pending delayed effect
             if (pendingEffectTime > 0 && System.currentTimeMillis() >= pendingEffectTime) {
                 pendingEffectTime = 0;
@@ -325,8 +772,11 @@ public class PhonkEditClient implements ClientModInitializer {
                 boolean trackKnown = PhonkManager.getInstance().isPlaying();
                 boolean stillPlaying = PhonkManager.getInstance().isCurrentTrackPlaying();
                 if (trackKnown) {
+                    // If the track is expected but not yet actually playing, allow a short grace period
                     if (!stillPlaying) {
-                        endFreezeEffect();
+                        if (trackPlayWaitDeadline == 0 || System.currentTimeMillis() >= trackPlayWaitDeadline) {
+                            endFreezeEffect();
+                        }
                     }
                 } else {
                     if (System.currentTimeMillis() - freezeActivationTime >= ModConfig.INSTANCE.effectDuration) {
@@ -603,13 +1053,42 @@ public class PhonkEditClient implements ClientModInitializer {
             hasPreservedVelocity = false;
         }
 
-        PhonkManager manager = PhonkManager.getInstance();
-        manager.playRandomTrack();
-        if (manager.getCurrentSoundEvent() == ModSounds.PHONK6) {
-            overrideSkullTexture = currentSpecialSkullTexture;
+    PhonkManager manager = PhonkManager.getInstance();
+    manager.playRandomTrack();
+        SoundEvent currentEvent = manager.getCurrentSoundEvent();
+        Identifier selectedTexture = null;
+
+    if (isSpecialTrack(currentEvent)) {
+            Identifier specialTexture = resolveSpecialSkullTexture();
+            if (specialTexture != null) {
+                overrideSkullTexture = specialTexture;
+                selectedTexture = specialTexture;
+            } else if (!SKULL_TEXTURES.isEmpty()) {
+                currentSkullIndex = (int) (Math.random() * SKULL_TEXTURES.size());
+                selectedTexture = SKULL_TEXTURES.get(currentSkullIndex);
+            } else {
+                overrideSkullTexture = SPECIAL_SKULL_PHONK6;
+                selectedTexture = overrideSkullTexture;
+            }
         } else if (!SKULL_TEXTURES.isEmpty()) {
             currentSkullIndex = (int) (Math.random() * SKULL_TEXTURES.size());
+            selectedTexture = SKULL_TEXTURES.get(currentSkullIndex);
+        } else {
+            overrideSkullTexture = SPECIAL_SKULL_PHONK6;
+            selectedTexture = overrideSkullTexture;
         }
+
+        if (selectedTexture != null) {
+            resetAnimationFor(selectedTexture);
+        }
+
+        // If the sound system hasn't started streaming yet, give it a short grace period
+        if (manager.isPlaying() && !manager.isCurrentTrackPlaying()) {
+            trackPlayWaitDeadline = System.currentTimeMillis() + TRACK_PLAY_GRACE_MS;
+        } else {
+            trackPlayWaitDeadline = 0;
+        }
+
         requestCapture = true;
         PhonkEditMod.LOGGER.info("Activated freeze effect");
     }
@@ -779,6 +1258,106 @@ public class PhonkEditClient implements ClientModInitializer {
         freezeTexture = null;
         freezeTextureId = null;
         freezeTexWidth = 0; freezeTexHeight = 0;
+    }
+
+    private static final class CustomTexture {
+        private final Identifier id;
+        private final NativeImageBackedTexture texture;
+        private final GifAnimation animation;
+        private final Path sourcePath;
+
+        private CustomTexture(Identifier id, NativeImageBackedTexture texture, GifAnimation animation, Path sourcePath) {
+            this.id = id;
+            this.texture = texture;
+            this.animation = animation;
+            this.sourcePath = sourcePath;
+        }
+
+        private Identifier id() {
+            return id;
+        }
+
+        private void tick() {
+            if (animation != null) {
+                animation.tick(texture);
+            }
+        }
+
+        private void resetAnimation() {
+            if (animation != null) {
+                animation.reset(texture);
+            }
+        }
+
+        private void destroy(TextureManager textureManager) {
+            if (textureManager != null) {
+                textureManager.destroyTexture(id);
+            }
+            if (animation != null) {
+                animation.close();
+            }
+            try {
+                texture.close();
+            } catch (Exception ignored) {
+                // Ignored
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "CustomTexture{" + id + " from " + sourcePath.getFileName() + "}";
+        }
+    }
+
+    private static final class GifAnimation implements AutoCloseable {
+        private final List<NativeImage> frames;
+        private final int[] frameDurations;
+        private int frameIndex = 0;
+        private long frameStartTime = System.currentTimeMillis();
+
+        private GifAnimation(List<NativeImage> frames, List<Integer> durations) {
+            this.frames = new ArrayList<>(frames);
+            this.frameDurations = new int[this.frames.size()];
+            for (int i = 0; i < this.frames.size(); i++) {
+                int duration = i < durations.size() ? durations.get(i) : durations.isEmpty() ? 100 : durations.get(durations.size() - 1);
+                this.frameDurations[i] = Math.max(20, duration);
+            }
+        }
+
+        private void reset(NativeImageBackedTexture texture) {
+            frameIndex = 0;
+            frameStartTime = System.currentTimeMillis();
+            apply(texture);
+        }
+
+        private void tick(NativeImageBackedTexture texture) {
+            if (frames.size() <= 1) {
+                return;
+            }
+            long now = System.currentTimeMillis();
+            int duration = frameDurations[frameIndex];
+            if (now - frameStartTime >= duration) {
+                frameIndex = (frameIndex + 1) % frames.size();
+                frameStartTime = now;
+                apply(texture);
+            }
+        }
+
+        private void apply(NativeImageBackedTexture texture) {
+            NativeImage target = texture.getImage();
+            if (target == null) {
+                return;
+            }
+            copyImageData(frames.get(frameIndex), target);
+            texture.upload();
+        }
+
+        @Override
+        public void close() {
+            for (NativeImage frame : frames) {
+                frame.close();
+            }
+        }
     }
 
     
