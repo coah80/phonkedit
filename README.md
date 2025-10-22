@@ -17,6 +17,7 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 - **Fabric Loader** 0.15.0 or higher
 - **Fabric API** (latest version)
 - **Java** 17 or higher
+- For in-game config UI: **Mod Menu** and **Cloth Config**
 
 ### Steps
 
@@ -31,7 +32,7 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 You can configure Phonk Edit in two ways:
 
 ### In-Game (Recommended)
-1. Install [Mod Menu](https://modrinth.com/mod/modmenu)
+1. Install [Mod Menu](https://modrinth.com/mod/modmenu) and [Cloth Config](https://modrinth.com/mod/cloth-config)
 2. Click "Mods" button in main menu
 3. Find "Phonk Edit" and click the config button
 4. Adjust settings with sliders and toggles
