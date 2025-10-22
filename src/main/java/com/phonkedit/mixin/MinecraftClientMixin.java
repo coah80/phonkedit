@@ -12,11 +12,8 @@ public class MinecraftClientMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(boolean tick, CallbackInfo ci) {
-        if (!CursedPhonkClient.isFreezeModeActive()) {
+        if (!PhonkEditClient.isFreezeModeActive()) {
             return;
         }
-        
-        // TODO: Implement Renderer-based overlay here
-        // This will be replaced with Renderer API calls once we inspect the library
     }
 }

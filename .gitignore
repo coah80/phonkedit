@@ -4,6 +4,8 @@ build/
 out/
 classes/
 !gradle/wrapper/gradle-wrapper.jar
+.gradle-cache/
+gradle-app.setting
 
 # Eclipse
 *.launch
@@ -12,25 +14,35 @@ classes/
 .classpath
 .project
 bin/
+.factorypath
 
 # IntelliJ IDEA
 .idea/
 *.iml
 *.ipr
 *.iws
+out/
 
 # VSCode
 .vscode/
 *.code-workspace
+.history/
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
 # Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
 
 # fabric
 run/
+remapped/
 
 # Minecraft Client
 *.log
@@ -41,6 +53,13 @@ usernamecache.json
 options.txt
 servers.dat
 servers.dat_old
+realms_persistence.json
+replay_recordings/
+screenshots/
+shaderpacks/
+saves/
+resourcepacks/
+config/
 
 # Development artifacts
 *.class
@@ -57,6 +76,15 @@ servers.dat_old
 *.bak
 *.swp
 *~
+*.orig
 
 # Personal/Local Gradle config
 gradle.properties
+
+# Loom cache and remapping
+.loom-cache/
+remapped_mods/
+remapped_working/
+
+# Build reports
+build/reports/

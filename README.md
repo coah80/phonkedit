@@ -28,19 +28,31 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 
 ## Configuration
 
+You can configure Phonk Edit in two ways:
+
+### In-Game (Recommended)
+1. Install [Mod Menu](https://modrinth.com/mod/modmenu)
+2. Click "Mods" button in main menu
+3. Find "Phonk Edit" and click the config button
+4. Adjust settings with sliders and toggles
+5. Changes save automatically!
+
+### Manual Configuration
 Configuration file is located at `.minecraft/config/phonkedit.json`
 
 ```json
 {
   "enablePhonkEffect": true,
   "triggerChance": 0.10,
-  "effectDuration": 3000
+  "effectDuration": 3000,
+  "shakeIntensity": 1.0
 }
 ```
 
 - `enablePhonkEffect` - Enable/disable the mod (default: `true`)
 - `triggerChance` - Chance of effect triggering (0.0-1.0, default: `0.10`)
 - `effectDuration` - Effect duration in milliseconds (default: `3000`)
+- `shakeIntensity` - Skull shake intensity multiplier (default: `1.0`, higher = more shake, try `5.0` for outrageous!)
 
 ## Building from Source
 
@@ -85,15 +97,6 @@ To run the mod in a development environment:
 - Verify you have Fabric Loader and Fabric API installed
 - Check that you're using Minecraft 1.21.1
 - Ensure Java 17+ is installed
-
-### No sound plays
-- Check your Minecraft sound settings
-- Verify the mod's audio files are present in the JAR
-
-### Performance issues
-- Lower the `triggerChance` in the config
-- Reduce `effectDuration` for shorter effects
-- Check for conflicts with other rendering mods
 
 ## Support
 

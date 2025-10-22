@@ -18,6 +18,7 @@ public class ModConfig {
     public boolean enablePhonkEffect = true;
     public double triggerChance = 0.10;
     public int effectDuration = 3000;
+    public double shakeIntensity = 1.0; // Multiplier for shake effect (1.0 = normal, higher = more intense)
 
     public static ModConfig INSTANCE = new ModConfig();
 

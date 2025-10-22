@@ -27,6 +27,11 @@ dependencies {
     
     // Mod Menu API (for 1.21.1)
     modImplementation "com.terraformersmc:modmenu:11.0.1"
+    
+    // Cloth Config API for in-game config screen
+    modApi("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 }
 
 processResources {
