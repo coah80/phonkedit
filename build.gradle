@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = '2.1.1'
+version = '2.0.1'
 group = 'com.phonkedit'
 archivesBaseName = 'phonkedit'
 
@@ -38,15 +38,15 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.release = 21
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
 

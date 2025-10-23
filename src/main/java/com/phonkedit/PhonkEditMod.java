@@ -16,6 +16,7 @@ public class PhonkEditMod implements ModInitializer {
         LOGGER.info("Initializing Phonk Edit");
         ModConfig.load();
         NetworkHandler.initServer();
+        ModBlocks.initialize();
 
         if (!FabricLoader.getInstance().isModLoaded("modmenu") && !ModConfig.INSTANCE.modMenuDisclaimerShown) {
             LOGGER.warn("Phonk Edit: Mod Menu not detected. Install Mod Menu for the full configuration UI or continue using the bundled fallback screen.");
