@@ -3,6 +3,7 @@ package com.phonkedit.client;
 import com.phonkedit.ModSounds;
 import com.phonkedit.PhonkEditMod;
 import com.phonkedit.audio.PhonkManager;
+import com.phonkedit.audio.CustomSongs;
 import com.phonkedit.config.ModConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,6 +14,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gui.DrawContext;
@@ -752,6 +756,18 @@ public class PhonkEditClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Prepare config-based custom songs and discover them on resource reloads
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override
+            public Identifier getFabricId() {
+                return Identifier.of("phonkedit", "custom_songs_loader");
+            }
+
+            @Override
+            public void reload(net.minecraft.resource.ResourceManager manager) {
+                CustomSongs.prepareAndReload(manager);
+            }
+        });
     PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
     ClientLifecycleEvents.CLIENT_STARTED.register(client -> reloadSkullTextureList());
         

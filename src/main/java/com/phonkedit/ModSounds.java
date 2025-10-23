@@ -1,5 +1,6 @@
 package com.phonkedit;
 
+import com.phonkedit.audio.CustomSongs;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
@@ -19,7 +20,7 @@ public class ModSounds {
     public static final SoundEvent PHONK11 = registerSound("phonk11");
     public static final SoundEvent PHONK12 = registerSound("phonk12");
 
-    private static final SoundEvent[] ALL_SOUNDS = new SoundEvent[] {
+    private static final SoundEvent[] BUILTIN_SOUNDS = new SoundEvent[] {
         PHONK1, PHONK2, PHONK3, PHONK4, PHONK5,
         PHONK6, PHONK7, PHONK8, PHONK9, PHONK10,
         PHONK11, PHONK12
@@ -31,10 +32,18 @@ public class ModSounds {
     }
 
     public static void initialize() {
-        PhonkEditMod.LOGGER.info("Registered {} phonk sounds", ALL_SOUNDS.length);
+        PhonkEditMod.LOGGER.info("Registered {} built-in phonk sounds", BUILTIN_SOUNDS.length);
     }
 
     public static SoundEvent[] getAllPhonkSounds() {
-        return ALL_SOUNDS.clone();
+        // Combine built-ins with any discovered custom songs
+        var custom = CustomSongs.getCustomSongEvents();
+        if (custom.isEmpty()) return BUILTIN_SOUNDS.clone();
+        SoundEvent[] combined = new SoundEvent[BUILTIN_SOUNDS.length + custom.size()];
+        System.arraycopy(BUILTIN_SOUNDS, 0, combined, 0, BUILTIN_SOUNDS.length);
+        for (int i = 0; i < custom.size(); i++) {
+            combined[BUILTIN_SOUNDS.length + i] = custom.get(i);
+        }
+        return combined;
     }
 }
