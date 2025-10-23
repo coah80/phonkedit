@@ -6,8 +6,10 @@ import com.phonkedit.config.ModConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Identifier;
 
 import java.util.Random;
 
@@ -20,17 +22,23 @@ public class PhonkManager {
     private boolean currentIsCustom = false;
     private long customCutoffDeadlineMs = 0L;
 
+    public static final class TrackSelection {
+        public final SoundEvent event;
+        public final float pitch;
+
+        public TrackSelection(SoundEvent event, float pitch) {
+            this.event = event;
+            this.pitch = pitch;
+        }
+    }
+
     public static PhonkManager getInstance() {
         return INSTANCE;
     }
 
-    public SoundInstance playRandomTrack() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        
+    public TrackSelection pickRandomTrackAndPitch() {
         SoundEvent[] sounds = ModSounds.getAllPhonkSounds();
         SoundEvent selectedSound = sounds[random.nextInt(sounds.length)];
-        currentSoundEvent = selectedSound;
-        currentIsCustom = CustomSongs.isCustom(selectedSound);
 
         double minPitch = ModConfig.INSTANCE.phonkPitchMin;
         double maxPitch = ModConfig.INSTANCE.phonkPitchMax;
@@ -45,18 +53,42 @@ public class PhonkManager {
         float pitch = (float) (range <= 0.0001 ? minPitch : (minPitch + random.nextDouble() * range));
         pitch = MathHelper.clamp(pitch, 0.5f, 2.0f);
 
-        PositionedSoundInstance instance = PositionedSoundInstance.master(selectedSound, 1.0f, pitch);
-        client.getSoundManager().play(instance);
+        return new TrackSelection(selectedSound, pitch);
+    }
 
+    public SoundInstance playRandomTrack() {
+        TrackSelection sel = pickRandomTrackAndPitch();
+        return playTrack(sel.event, sel.pitch);
+    }
+
+    public SoundInstance playTrack(SoundEvent event, float pitch) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        currentSoundEvent = event;
+        currentIsCustom = CustomSongs.isCustom(event);
+        PositionedSoundInstance instance = PositionedSoundInstance.master(event, 1.0f, pitch);
+        client.getSoundManager().play(instance);
         currentInstance = instance;
         isPlaying = true;
         if (currentIsCustom) {
-            customCutoffDeadlineMs = System.currentTimeMillis() + 5000L; // 5 seconds hard cap for custom songs
+            customCutoffDeadlineMs = System.currentTimeMillis() + 5000L;
         } else {
             customCutoffDeadlineMs = 0L;
         }
         PhonkEditMod.LOGGER.info("Playing phonk track (pitch {}, custom: {})", String.format("%.2f", pitch), currentIsCustom);
         return instance;
+    }
+
+    public SoundInstance playTrackById(Identifier id, float pitch) {
+        // Find matching event across built-in + custom
+        for (SoundEvent e : ModSounds.getAllPhonkSounds()) {
+            Identifier eid = Registries.SOUND_EVENT.getId(e);
+            if (eid != null && eid.equals(id)) {
+                return playTrack(e, pitch);
+            }
+        }
+        // Fallback: random if id not found
+        PhonkEditMod.LOGGER.warn("Unknown sound id '{}', falling back to random", id);
+        return playRandomTrack();
     }
 
     public void stopAll() {

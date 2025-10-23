@@ -1,6 +1,7 @@
 package com.phonkedit;
 
 import com.phonkedit.audio.CustomSongs;
+import com.phonkedit.config.ModConfig;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
@@ -36,14 +37,22 @@ public class ModSounds {
     }
 
     public static SoundEvent[] getAllPhonkSounds() {
-        // Combine built-ins with any discovered custom songs
         var custom = CustomSongs.getCustomSongEvents();
-        if (custom.isEmpty()) return BUILTIN_SOUNDS.clone();
-        SoundEvent[] combined = new SoundEvent[BUILTIN_SOUNDS.length + custom.size()];
-        System.arraycopy(BUILTIN_SOUNDS, 0, combined, 0, BUILTIN_SOUNDS.length);
-        for (int i = 0; i < custom.size(); i++) {
-            combined[BUILTIN_SOUNDS.length + i] = custom.get(i);
+        if (!custom.isEmpty()) {
+            if (ModConfig.INSTANCE.mixBuiltinWithCustomSongs) {
+                // Combine built-ins + custom
+                SoundEvent[] combined = new SoundEvent[BUILTIN_SOUNDS.length + custom.size()];
+                System.arraycopy(BUILTIN_SOUNDS, 0, combined, 0, BUILTIN_SOUNDS.length);
+                for (int i = 0; i < custom.size(); i++) {
+                    combined[BUILTIN_SOUNDS.length + i] = custom.get(i);
+                }
+                return combined;
+            } else {
+                // Custom only
+                return custom.toArray(new SoundEvent[0]);
+            }
         }
-        return combined;
+        // No custom provided: built-ins only
+        return BUILTIN_SOUNDS.clone();
     }
 }

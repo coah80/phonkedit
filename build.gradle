@@ -50,6 +50,16 @@ java {
     withSourcesJar()
 }
 
+loom {
+    runs {
+        client2 {
+            client()
+            name "Minecraft Client 2"
+            runDir "run2"
+        }
+    }
+}
+
 jar {
     from("LICENSE") {
         rename { "${it}_${archivesBaseName}" }

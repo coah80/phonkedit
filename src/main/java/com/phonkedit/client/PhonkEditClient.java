@@ -5,6 +5,7 @@ import com.phonkedit.PhonkEditMod;
 import com.phonkedit.audio.PhonkManager;
 import com.phonkedit.audio.CustomSongs;
 import com.phonkedit.config.ModConfig;
+import com.phonkedit.network.NetworkHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -756,6 +757,8 @@ public class PhonkEditClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Client networking receiver
+        NetworkHandler.initClient();
         // Prepare config-based custom songs and discover them on resource reloads
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             @Override
@@ -779,17 +782,28 @@ public class PhonkEditClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            // Dev: keep game running when tabbed out by forcing pause-on-lost-focus off
+            if (ModConfig.INSTANCE.devDisablePauseOnLostFocus) {
+                try {
+                    if (client != null && client.options != null) {
+                        if (client.options.pauseOnLostFocus) {
+                            client.options.pauseOnLostFocus = false;
+                        }
+                    }
+                } catch (Throwable ignored) { }
+            }
+
             tickCustomTextureAnimations();
             
             // If user opened the pause menu, immediately end the effect so the world can save/quit safely
-            if (isFreezeModeActive && client.isPaused()) {
+            if (isFreezeModeActive && client.isPaused() && !ModConfig.INSTANCE.devDontEndOnPause) {
                 endFreezeEffect();
             }
 
             // Check for pending delayed effect
             if (pendingEffectTime > 0 && System.currentTimeMillis() >= pendingEffectTime) {
                 pendingEffectTime = 0;
-                activateFreezeEffect();
+                triggerSyncedOrLocal();
             }
             
             // Auto end effect based on audio playback, fallback to configured duration
@@ -1067,6 +1081,7 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     public static void activateFreezeEffect() {
+        // Local-only activation: picks random content and plays locally
         isFreezeModeActive = true;
         freezeActivationTime = System.currentTimeMillis();
         overrideSkullTexture = null;
@@ -1122,6 +1137,129 @@ public class PhonkEditClient implements ClientModInitializer {
 
         requestCapture = true;
         PhonkEditMod.LOGGER.info("Activated freeze effect");
+    }
+
+    private static void triggerSyncedOrLocal() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        boolean canNet = mc != null && mc.getNetworkHandler() != null;
+        if (canNet) {
+            // Choose a track and skull image but don't activate locally; server will broadcast back
+            var sel = PhonkManager.getInstance().pickRandomTrackAndPitch();
+            Identifier chosenTexture = chooseSkullTextureForEvent(sel.event);
+            byte[] skullPng = encodeSkullTextureToPng(chosenTexture);
+            NetworkHandler.sendActivateRequestToServer(getSoundId(sel.event), sel.pitch, skullPng);
+        } else {
+            activateFreezeEffect();
+        }
+    }
+
+    private static Identifier chooseSkullTextureForEvent(SoundEvent currentEvent) {
+        Identifier selectedTexture = null;
+        if (isSpecialTrack(currentEvent)) {
+            Identifier specialTexture = resolveSpecialSkullTexture();
+            if (specialTexture != null) {
+                selectedTexture = specialTexture;
+            } else if (!SKULL_TEXTURES.isEmpty()) {
+                currentSkullIndex = (int) (Math.random() * SKULL_TEXTURES.size());
+                selectedTexture = SKULL_TEXTURES.get(currentSkullIndex);
+            } else {
+                selectedTexture = SPECIAL_SKULL_PHONK6;
+            }
+        } else if (!SKULL_TEXTURES.isEmpty()) {
+            currentSkullIndex = (int) (Math.random() * SKULL_TEXTURES.size());
+            selectedTexture = SKULL_TEXTURES.get(currentSkullIndex);
+        } else {
+            selectedTexture = SPECIAL_SKULL_PHONK6;
+        }
+        return selectedTexture;
+    }
+
+    private static String getSoundId(SoundEvent event) {
+        var id = net.minecraft.registry.Registries.SOUND_EVENT.getId(event);
+        return id != null ? id.toString() : "phonkedit:phonk1";
+    }
+
+    private static byte[] encodeSkullTextureToPng(Identifier id) {
+        try {
+            // Prefer resource contents if available (for built-ins)
+            ResourceManager rm = MinecraftClient.getInstance().getResourceManager();
+            var opt = rm.getResource(id);
+            if (opt.isPresent()) {
+                try (InputStream in = opt.get().getInputStream()) {
+                    return in.readAllBytes();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Fallback: if this is a custom dynamic texture, dump its current image frame
+        MinecraftClient mc = MinecraftClient.getInstance();
+        TextureManager tm = mc.getTextureManager();
+        var tex = tm.getTexture(id);
+        if (tex instanceof NativeImageBackedTexture nibt) {
+            NativeImage img = nibt.getImage();
+            if (img != null) {
+                try {
+                    // NativeImage in this version lacks OutputStream write; write to temp file
+                    java.nio.file.Path tmp = java.nio.file.Files.createTempFile("phonk-skull", ".png");
+                    img.writeTo(tmp.toFile());
+                    byte[] bytes = java.nio.file.Files.readAllBytes(tmp);
+                    java.nio.file.Files.deleteIfExists(tmp);
+                    return bytes;
+                } catch (Exception e) {
+                    PhonkEditMod.LOGGER.warn("Failed to encode skull texture to PNG: {}", e.toString());
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void onActivateFromNetwork(String soundId, float pitch, byte[] skullPng) {
+        // Called from networking thread on client; schedule in main thread already
+        // Prepare override skull texture if provided
+        Identifier dyn = null;
+        if (skullPng != null && skullPng.length > 0) {
+            dyn = registerDynamicSkull(skullPng);
+        }
+        // Activate locally but play the specific track/pitch
+        isFreezeModeActive = true;
+        freezeActivationTime = System.currentTimeMillis();
+        overrideSkullTexture = dyn;
+        currentSkullIndex = 0;
+
+        PhonkManager manager = PhonkManager.getInstance();
+        Identifier sid = Identifier.tryParse(soundId);
+        if (sid != null) {
+            manager.playTrackById(sid, pitch);
+        } else {
+            manager.playRandomTrack();
+        }
+
+        if (overrideSkullTexture != null) {
+            resetAnimationFor(overrideSkullTexture);
+        }
+        if (manager.isPlaying() && !manager.isCurrentTrackPlaying()) {
+            trackPlayWaitDeadline = System.currentTimeMillis() + TRACK_PLAY_GRACE_MS;
+        } else {
+            trackPlayWaitDeadline = 0;
+        }
+        requestCapture = true;
+        PhonkEditMod.LOGGER.info("Activated freeze effect (synced)");
+    }
+
+    private static Identifier registerDynamicSkull(byte[] png) {
+        try {
+            NativeImage img = NativeImage.read(new java.io.ByteArrayInputStream(png));
+            // Scale to skull size for consistency
+            NativeImage scaled = scaleToSquare(img, SKULL_TEXTURE_SIZE);
+            img.close();
+            NativeImageBackedTexture tex = new NativeImageBackedTexture(scaled);
+            Identifier id = Identifier.of(PhonkEditMod.MOD_ID, "net/skull_" + System.currentTimeMillis());
+            MinecraftClient.getInstance().getTextureManager().registerTexture(id, tex);
+            return id;
+        } catch (Exception e) {
+            PhonkEditMod.LOGGER.warn("Failed to register dynamic skull from PNG: {}", e.toString());
+            return null;
+        }
     }
 
     
@@ -1258,14 +1396,8 @@ public class PhonkEditClient implements ClientModInitializer {
                 }
             }
 
-            for (int yTop = 0, yBot = h - 1; yTop < yBot; yTop++, yBot--) {
-                for (int x = 0; x < w; x++) {
-                    int top = image.getColor(x, yTop);
-                    int bot = image.getColor(x, yBot);
-                    image.setColor(x, yTop, bot);
-                    image.setColor(x, yBot, top);
-                }
-            }
+            // Do not flip vertically: both ScreenshotRecorder and framebuffer read
+            // produce correctly oriented images in 1.21.1 with drawTexture.
 
             // Upload to a dynamic texture and keep id
             clearFreezeFrame();

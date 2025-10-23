@@ -7,6 +7,7 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 - 🎵 **Phonk Audio System** - Random phonk tracks play during effects
 - 💀 **Freeze Overlay** - Fullscreen greyscale effect with animated skull graphics
 - 🎮 **Custom Rendering** - Powered by the Renderer library for smooth visuals
+- 🌐 **Multiplayer Sync (New)** - One player's trigger can sync the same effect, song, and skull across all players
  
 - ⚡ **Performance Optimized** - Lightweight and efficient
 
@@ -34,6 +35,11 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 - Your songs are included in the random rotation
 
 6) Saving/quitting
+7) Multiplayer
+- Everyone must have this mod installed. When any player triggers the effect, the server broadcasts the selection so all clients play the same track and show the same skull.
+- Custom songs: Other players need a matching resource pack entry to hear the exact custom track name. If a client doesn’t have that custom sound, it will gracefully fall back to a built-in track.
+- Custom images: The triggering player sends a 256×256 PNG snapshot of the chosen skull (single frame). All clients render that exact image.
+
 - Opening the pause menu ends the effect so you can save/quit reliably
 
 ## Installation
@@ -134,6 +140,11 @@ Tips
 - Ensure Java 21 (or at least 17) is installed
 
 ### No sound from custom songs
+- In multiplayer, all clients need to enable a resource pack that contains the same custom sound keys (the mod generates `phonkedit-custom-songs` locally). Missing sounds will fall back to built-in tracks per-client.
+
+### Multiplayer notes
+- Dedicated servers are supported. The “pause server during effect” behavior only applies to singleplayer/integrated servers.
+
 - Enable the generated resource pack at `.minecraft/resourcepacks/phonkedit-custom-songs/`
 - Place `.ogg` files in `.minecraft/config/phonkedit/songs/` (simple lowercase filenames recommended)
 - Use the Resource Packs menu “Done” button to reload after changes
@@ -167,7 +178,9 @@ Drop-in via config folder:
 
 Notes
 - Use simple lowercase filenames (letters, numbers, underscores). We sanitize names automatically.
-- Tracks are streamed and included in the same random selection as built-ins.
+- In the config (Audio), you can choose to mix your songs with built-ins (default) or use only your songs.
+- Remove your songs to fall back to built-ins.
+- Tracks are streamed and included in the random selection.
 - Please trim your tracks to the beat drop, itll work best then.
 - Custom songs are capped at 5 seconds, to minimize the jank
 

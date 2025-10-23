@@ -4,9 +4,9 @@
   "package": "com.phonkedit.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MinecraftServerMixin"
   ],
   "client": [
+    "MinecraftServerMixin",
     "MinecraftClientMixin",
     "PlayerInputMixin",
     "MouseMixin",

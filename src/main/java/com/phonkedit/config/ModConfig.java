@@ -38,6 +38,7 @@ public class ModConfig {
     // Audio tempo range
     public double phonkPitchMin = 0.95;
     public double phonkPitchMax = 1.05;
+    public boolean mixBuiltinWithCustomSongs = true; // If true, include built-ins with custom songs
 
     // Visual options
     public boolean grayscaleFreezeFrame = true;
@@ -54,6 +55,12 @@ public class ModConfig {
 
     // Misc state
     public boolean modMenuDisclaimerShown = false;
+
+    // Misc/Dev options
+    // When true, Minecraft won't pause on lost focus (we force the option off every tick).
+    public boolean devDisablePauseOnLostFocus = false;
+    // When true, the mod will not auto-end the effect if the game is paused (escape menu etc.).
+    public boolean devDontEndOnPause = false;
 
     public static ModConfig INSTANCE = new ModConfig();
 
