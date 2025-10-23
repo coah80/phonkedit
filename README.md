@@ -7,6 +7,7 @@ A Fabric Minecraft mod that brings YouTube Shorts style phonk edit effects to yo
 - 🎵 **Phonk Audio System** - Random phonk tracks play during effects
 - 💀 **Freeze Overlay** - Fullscreen greyscale effect with animated skull graphics
 - 🎮 **Custom Rendering** - Powered by the Renderer library for smooth visuals
+ 
 - ⚡ **Performance Optimized** - Lightweight and efficient
 
 ## Installation
@@ -54,6 +55,7 @@ Configuration file is located at `.minecraft/config/phonkedit.json`
 - `triggerChance` - Chance of effect triggering (0.0-1.0, default: `0.10`)
 - `effectDuration` - Effect duration in milliseconds (default: `3000`)
 - `shakeIntensity` - Skull shake intensity multiplier (default: `1.0`, higher = more shake, try `5.0` for outrageous!)
+ 
 
 ## Building from Source
 

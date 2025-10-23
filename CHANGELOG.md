@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.1] - 2025-10-22
+
+### Fixes and polish
+
+- Block placement trigger is now precise: only fires when a block is actually placed.
+  - No more false triggers when right-clicking chests, crafting tables, etc. while holding a block.
+- All triggers consistently respect Trigger Chance.
+  - Block placement no longer bypasses chance; it now uses the same gate as other triggers.
+- Trigger Chance defaults to 0.50 (50%).
+  - Existing configs still on the old default (0.10) are auto-migrated to 0.50 on load.
+  - Value is clamped to [0.0, 1.0]. 0.0 = never, 1.0 = always.
+- You can now save/quit reliably during an active effect.
+  - The effect is cleanly ended when the game is paused so the pause menu actions work.
+- Skull overlay size is normalized across GUI scales to match the look at GUI scale 3.
+  - Added a “Skull Size (scale)” slider (0.1–2.0, default 0.4) under Visual Effects.
+- Promo & Support tweaks:
+  - TikTok link color set to pink (FF69B4) and GitHub link added.
+
+### Internal
+
+- Minor refactors and config normalization improvements.
+
 ## [2.0.0] - 2025-10-22
 
 ### 🎨 Visual Stuff

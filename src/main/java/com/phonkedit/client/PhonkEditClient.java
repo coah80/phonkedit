@@ -86,7 +86,8 @@ public class PhonkEditClient implements ClientModInitializer {
     // private static final Set<String> SPECIAL_NAME_HINTS = Set.of("skull20");
     private static final int SKULL_TEXTURE_SIZE = 256;
     private static final int SKULL_RENDER_SIZE = 256;
-    private static final float SKULL_RENDER_SCALE = 0.4f;
+    // NOTE: scale is now configurable via ModConfig.skullScale; left for reference
+    // private static final float SKULL_RENDER_SCALE = 0.4f;
     private static int userSkullIdCounter = 0;
     private static int specialSkullIdCounter = 0;
     private static CustomTexture customSpecialSkull = null;
@@ -747,6 +748,8 @@ public class PhonkEditClient implements ClientModInitializer {
     private static long airStartTimeMs = 0L;
     private static boolean airTriggerConsumed = false;
 
+    
+
     @Override
     public void onInitializeClient() {
     PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
@@ -761,6 +764,12 @@ public class PhonkEditClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             tickCustomTextureAnimations();
+            
+            // If user opened the pause menu, immediately end the effect so the world can save/quit safely
+            if (isFreezeModeActive && client.isPaused()) {
+                endFreezeEffect();
+            }
+
             // Check for pending delayed effect
             if (pendingEffectTime > 0 && System.currentTimeMillis() >= pendingEffectTime) {
                 pendingEffectTime = 0;
@@ -940,7 +949,11 @@ public class PhonkEditClient implements ClientModInitializer {
             }
         }
 
-        int skullSize = Math.max(1, Math.round(SKULL_RENDER_SIZE * SKULL_RENDER_SCALE));
+    int skullBaseSize = Math.max(1, Math.round(SKULL_RENDER_SIZE * (float)Math.max(0.1, Math.min(2.0, ModConfig.INSTANCE.skullScale))));
+    // Normalize skull size so it looks like GUI Scale 3 regardless of current scale
+    double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
+    double targetGuiScale = 3.0;
+    int skullSize = Math.max(1, (int)Math.round(skullBaseSize * (targetGuiScale / Math.max(1.0, scaleFactor))));
         int hotbarHeight = 22;
         int padding = 40;
         int y = screenHeight - hotbarHeight - skullSize - padding;
@@ -1082,6 +1095,8 @@ public class PhonkEditClient implements ClientModInitializer {
             resetAnimationFor(selectedTexture);
         }
 
+        
+
         // If the sound system hasn't started streaming yet, give it a short grace period
         if (manager.isPlaying() && !manager.isCurrentTrackPlaying()) {
             trackPlayWaitDeadline = System.currentTimeMillis() + TRACK_PLAY_GRACE_MS;
@@ -1092,6 +1107,8 @@ public class PhonkEditClient implements ClientModInitializer {
         requestCapture = true;
         PhonkEditMod.LOGGER.info("Activated freeze effect");
     }
+
+    
 
     public static void endFreezeEffect() {
         isFreezeModeActive = false;
@@ -1152,7 +1169,8 @@ public class PhonkEditClient implements ClientModInitializer {
         if (!ModConfig.INSTANCE.triggerOnBlockPlace) {
             return;
         }
-        scheduleEffect(true);
+        // Respect triggerChance for placements
+        scheduleEffect(false);
     }
 
     private static void scheduleEffect() {

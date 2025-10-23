@@ -16,7 +16,7 @@ public class ModConfig {
             .resolve("phonkedit.json");
 
     public boolean enablePhonkEffect = true;
-    public double triggerChance = 0.10;
+    public double triggerChance = 0.50;
     public int effectDuration = 3000;
     public double shakeIntensity = 1.0; // Multiplier for shake effect (1.0 = normal, higher = more intense)
 
@@ -46,8 +46,11 @@ public class ModConfig {
     public boolean renderSkullOverlay = true;
     public boolean skullShakeEnabled = true;
     public boolean skullBlurEnabled = true;
+    public double skullScale = 0.4; // Multiplier for skull on-screen size (default matches current visuals)
     public double skullBlurIntensity = 5.0; // Multiplier for blur spread/opacity (1.0 = previous default)
     public double skullBlurEasePower = 1.5; // Higher values make the blur fade out faster
+
+    
 
     // Misc state
     public boolean modMenuDisclaimerShown = false;
@@ -85,9 +88,17 @@ public class ModConfig {
         phonkPitchMin = min;
         phonkPitchMax = max;
 
-        skullBlurIntensity = clamp(skullBlurIntensity, 0.0, 5.0);
+        // Auto-migrate legacy default trigger chance (0.10) to new default (0.50)
+        if (Math.abs(triggerChance - 0.10) < 1e-9) {
+            triggerChance = 0.50;
+        }
+        triggerChance = clamp(triggerChance, 0.0, 1.0);
+    skullBlurIntensity = clamp(skullBlurIntensity, 0.0, 5.0);
         skullBlurEasePower = clamp(skullBlurEasePower, 0.1, 5.0);
         airTimeThresholdSeconds = clamp(airTimeThresholdSeconds, 0.1, 10.0);
+        skullScale = clamp(skullScale, 0.1, 2.0);
+
+        
     }
 
     private static double clampPitch(double value) {
