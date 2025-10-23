@@ -1,38 +1,32 @@
 ---
-name: Bug Report
-about: Create a report to help us improve
-title: '[BUG] '
+name: Bug report
+about: Report a reproducible bug so we can fix it.
+title: "[BUG] short summary"
 labels: bug
 assignees: ''
 ---
 
-## Bug Description
-A clear and concise description of what the bug is.
+**Summary**
+Short description of the bug.
 
-## To Reproduce
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '...'
-3. Scroll down to '...'
-4. See error
+**Steps to reproduce**
+1. 
+2. 
+3. 
 
-## Expected Behavior
-A clear and concise description of what you expected to happen.
+**Expected behavior**
+What you expected to happen.
 
-## Screenshots
-If applicable, add screenshots to help explain your problem.
+**Actual behavior**
+What happened instead (include error messages or log excerpts).
 
-## Environment
-- Minecraft Version: [e.g. 1.21.1]
-- Fabric Loader Version: [e.g. 0.15.0]
-- Mod Version: [e.g. 1.0.0]
-- Other Mods Installed: [list any other mods]
+**Environment**
+- Phonk Edit version / commit:
+- Minecraft version:
+- Fabric Loader version:
+- Fabric API version:
+- Java version:
+- OS:
 
-## Crash Report/Logs
-If applicable, paste your crash report or latest.log here:
-```
-[paste log here]
-```
-
-## Additional Context
-Add any other context about the problem here.
+**Logs / Attachments**
+Attach logs (logs/latest.log), screenshots, or a minimal test world if available.
