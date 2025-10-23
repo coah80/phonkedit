@@ -18,48 +18,38 @@ public class ModConfig {
     public boolean enablePhonkEffect = true;
     public double triggerChance = 0.50;
     public int effectDuration = 3000;
-    public double shakeIntensity = 1.0; // Multiplier for shake effect (1.0 = normal, higher = more intense)
+    public double shakeIntensity = 1.0;
 
-    // Additional triggers
     public boolean triggerOnBlockBreak = true;
     public boolean triggerOnBlockPlace = true;
     public boolean triggerOnEntityHit = true;
     public boolean triggerOnDamageTaken = true;
     public boolean triggerOnLowHealth = true;
-    public float lowHealthThreshold = 6.0f; // 3 hearts
+    public float lowHealthThreshold = 6.0f;
     public boolean triggerOnAirTime = true;
     public double airTimeThresholdSeconds = 1.3;
 
-    // Safety/"pause" options
     public boolean lockMouseDuringEffect = true;
     public boolean lockCameraDuringEffect = true;
     public boolean pauseServerDuringEffect = true;
 
-    // Audio tempo range
     public double phonkPitchMin = 0.95;
     public double phonkPitchMax = 1.05;
-    public boolean mixBuiltinWithCustomSongs = true; // If true, include built-ins with custom songs
+    public boolean mixBuiltinWithCustomSongs = true;
 
-    // Visual options
     public boolean grayscaleFreezeFrame = true;
     public boolean darkenScreenDuringEffect = true;
     public boolean showCinematicBars = true;
     public boolean renderSkullOverlay = true;
     public boolean skullShakeEnabled = true;
     public boolean skullBlurEnabled = true;
-    public double skullScale = 0.4; // Multiplier for skull on-screen size (default matches current visuals)
-    public double skullBlurIntensity = 5.0; // Multiplier for blur spread/opacity (1.0 = previous default)
-    public double skullBlurEasePower = 1.5; // Higher values make the blur fade out faster
+    public double skullScale = 0.4;
+    public double skullBlurIntensity = 5.0;
+    public double skullBlurEasePower = 1.5;
 
-    
-
-    // Misc state
     public boolean modMenuDisclaimerShown = false;
 
-    // Misc/Dev options
-    // When true, Minecraft won't pause on lost focus (we force the option off every tick).
     public boolean devDisablePauseOnLostFocus = false;
-    // When true, the mod will not auto-end the effect if the game is paused (escape menu etc.).
     public boolean devDontEndOnPause = false;
 
     public static ModConfig INSTANCE = new ModConfig();
@@ -95,7 +85,6 @@ public class ModConfig {
         phonkPitchMin = min;
         phonkPitchMax = max;
 
-        // Auto-migrate legacy default trigger chance (0.10) to new default (0.50)
         if (Math.abs(triggerChance - 0.10) < 1e-9) {
             triggerChance = 0.50;
         }
@@ -105,7 +94,6 @@ public class ModConfig {
         airTimeThresholdSeconds = clamp(airTimeThresholdSeconds, 0.1, 10.0);
         skullScale = clamp(skullScale, 0.1, 2.0);
 
-        
     }
 
     private static double clampPitch(double value) {

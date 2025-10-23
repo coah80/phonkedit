@@ -40,7 +40,6 @@ public class ModSounds {
         var custom = CustomSongs.getCustomSongEvents();
         if (!custom.isEmpty()) {
             if (ModConfig.INSTANCE.mixBuiltinWithCustomSongs) {
-                // Combine built-ins + custom
                 SoundEvent[] combined = new SoundEvent[BUILTIN_SOUNDS.length + custom.size()];
                 System.arraycopy(BUILTIN_SOUNDS, 0, combined, 0, BUILTIN_SOUNDS.length);
                 for (int i = 0; i < custom.size(); i++) {
@@ -48,11 +47,9 @@ public class ModSounds {
                 }
                 return combined;
             } else {
-                // Custom only
                 return custom.toArray(new SoundEvent[0]);
             }
         }
-        // No custom provided: built-ins only
         return BUILTIN_SOUNDS.clone();
     }
 }

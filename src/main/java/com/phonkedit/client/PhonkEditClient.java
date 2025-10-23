@@ -87,12 +87,8 @@ public class PhonkEditClient implements ClientModInitializer {
     private static final Path USER_IMAGES_DIR = USER_CONFIG_DIR.resolve("images");
     private static final String DEFAULT_EXPORT_MARKER = ".defaults_copied";
     private static final Set<String> SUPPORTED_IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "gif", "bmp", "wbmp", "tif", "tiff");
-    // Reserved for future flexibility; currently we treat only exact 'skull20' as special
-    // private static final Set<String> SPECIAL_NAME_HINTS = Set.of("skull20");
     private static final int SKULL_TEXTURE_SIZE = 256;
     private static final int SKULL_RENDER_SIZE = 256;
-    // NOTE: scale is now configurable via ModConfig.skullScale; left for reference
-    // private static final float SKULL_RENDER_SCALE = 0.4f;
     private static int userSkullIdCounter = 0;
     private static int specialSkullIdCounter = 0;
     private static CustomTexture customSpecialSkull = null;
@@ -185,7 +181,6 @@ public class PhonkEditClient implements ClientModInitializer {
         if (hasBuiltinSpecial) {
             currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
         } else {
-            // No special skull available; don't substitute a random one. Phonk6 will run without special overlay.
             currentSpecialSkullTexture = null;
         }
     }
@@ -319,7 +314,6 @@ public class PhonkEditClient implements ClientModInitializer {
                 try {
                     texture.close();
                 } catch (Exception ignored) {
-                    // Ignored
                 }
             }
 
@@ -370,7 +364,6 @@ public class PhonkEditClient implements ClientModInitializer {
         try (ImageInputStream stream = ImageIO.createImageInputStream(Files.newInputStream(imagePath))) {
             reader.setInput(stream, false, false);
 
-            // Determine logical screen (canvas) size
             int canvasW = -1, canvasH = -1;
             try {
                 IIOMetadata streamMeta = reader.getStreamMetadata();
@@ -380,7 +373,6 @@ public class PhonkEditClient implements ClientModInitializer {
             } catch (Exception ignored) { }
 
             int frameCount = Math.max(1, reader.getNumImages(true));
-            // Fallback to first frame size if logical screen is unknown
             if (canvasW <= 0 || canvasH <= 0) {
                 BufferedImage first = reader.read(0);
                 canvasW = first.getWidth();
@@ -400,16 +392,13 @@ public class PhonkEditClient implements ClientModInitializer {
                 int delay = extractGifDelay(meta);
                 GifFrameInfo info = parseGifFrameInfo(meta, frameImg);
 
-                // Draw this frame onto the persistent canvas at its offset
                 g.drawImage(frameImg, info.left, info.top, null);
 
-                // Snapshot composed result for this frame
                 BufferedImage snapshot = new BufferedImage(canvasW, canvasH, BufferedImage.TYPE_INT_ARGB);
                 java.awt.Graphics2D g2 = snapshot.createGraphics();
                 g2.drawImage(canvas, 0, 0, null);
                 g2.dispose();
 
-                // Convert to NativeImage and scale to skull size
                 NativeImage nativeComposed = bufferedToNative(snapshot);
                 try {
                     NativeImage scaled = scaleToSquare(nativeComposed, SKULL_TEXTURE_SIZE);
@@ -419,20 +408,17 @@ public class PhonkEditClient implements ClientModInitializer {
                 }
                 durations.add(delay);
 
-                // Apply disposal
                 if ("restoreToBackgroundColor".equals(info.disposal)) {
-                    // Clear the area of this frame for the next composite
                     java.awt.Composite old = g.getComposite();
                     g.setComposite(java.awt.AlphaComposite.Clear);
                     g.fillRect(info.left, info.top, info.width, info.height);
                     g.setComposite(old);
                 } else if ("restoreToPrevious".equals(info.disposal)) {
-                    // As a simple fallback, also clear (many GIFs still look fine)
                     java.awt.Composite old = g.getComposite();
                     g.setComposite(java.awt.AlphaComposite.Clear);
                     g.fillRect(info.left, info.top, info.width, info.height);
                     g.setComposite(old);
-                } // 'none' or 'doNotDispose' keeps canvas as-is
+                }
             }
 
             g.dispose();
@@ -460,7 +446,6 @@ public class PhonkEditClient implements ClientModInitializer {
                     delayCs = parsed;
                 }
             } catch (Exception ignored) {
-                // Ignored
             }
         }
         int delayMs = Math.max(1, delayCs) * 10;
@@ -479,7 +464,6 @@ public class PhonkEditClient implements ClientModInitializer {
                     try {
                         return Integer.parseInt(delayNode.getNodeValue());
                     } catch (NumberFormatException ignored) {
-                        // Ignored
                     }
                 }
             }
@@ -726,9 +710,8 @@ public class PhonkEditClient implements ClientModInitializer {
     private static int currentSkullIndex = 0;
     private static long worldJoinTime = 0;
     private static final long WORLD_JOIN_COOLDOWN = 3000;
-    private static final long EFFECT_DELAY = 300; // 0.3 second delay
+    private static final long EFFECT_DELAY = 300;
     private static long pendingEffectTime = 0;
-    // Allow a short grace period for streamed audio to actually begin playing before auto-ending
     private static final long TRACK_PLAY_GRACE_MS = 600;
     private static long trackPlayWaitDeadline = 0;
     
@@ -753,13 +736,9 @@ public class PhonkEditClient implements ClientModInitializer {
     private static long airStartTimeMs = 0L;
     private static boolean airTriggerConsumed = false;
 
-    
-
     @Override
     public void onInitializeClient() {
-        // Client networking receiver
         NetworkHandler.initClient();
-        // Prepare config-based custom songs and discover them on resource reloads
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             @Override
             public Identifier getFabricId() {
@@ -782,7 +761,6 @@ public class PhonkEditClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // Dev: keep game running when tabbed out by forcing pause-on-lost-focus off
             if (ModConfig.INSTANCE.devDisablePauseOnLostFocus) {
                 try {
                     if (client != null && client.options != null) {
@@ -795,23 +773,19 @@ public class PhonkEditClient implements ClientModInitializer {
 
             tickCustomTextureAnimations();
             
-            // If user opened the pause menu, immediately end the effect so the world can save/quit safely
             if (isFreezeModeActive && client.isPaused() && !ModConfig.INSTANCE.devDontEndOnPause) {
                 endFreezeEffect();
             }
 
-            // Check for pending delayed effect
             if (pendingEffectTime > 0 && System.currentTimeMillis() >= pendingEffectTime) {
                 pendingEffectTime = 0;
                 triggerSyncedOrLocal();
             }
             
-            // Auto end effect based on audio playback, fallback to configured duration
             if (isFreezeModeActive) {
                 boolean trackKnown = PhonkManager.getInstance().isPlaying();
                 boolean stillPlaying = PhonkManager.getInstance().isCurrentTrackPlaying();
                 if (trackKnown) {
-                    // If the track is expected but not yet actually playing, allow a short grace period
                     if (!stillPlaying) {
                         if (trackPlayWaitDeadline == 0 || System.currentTimeMillis() >= trackPlayWaitDeadline) {
                             endFreezeEffect();
@@ -836,7 +810,6 @@ public class PhonkEditClient implements ClientModInitializer {
 
             }
 
-            // Entity attack triggers
             GameOptions options = client.options;
             boolean attackKey = options.attackKey.isPressed();
             boolean targetIsEntity = client.crosshairTarget != null && client.crosshairTarget.getType() == HitResult.Type.ENTITY;
@@ -849,7 +822,6 @@ public class PhonkEditClient implements ClientModInitializer {
                 wasAttackingEntityLastTick = attackKey && targetIsEntity;
             }
 
-            // Damage/health based triggers
             if (client.player != null) {
                 float currentHealth = client.player.getHealth();
                 if (lastHealthInitialized) {
@@ -896,7 +868,6 @@ public class PhonkEditClient implements ClientModInitializer {
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            // Force end effect when disconnecting to allow world to save
             if (isFreezeModeActive) {
                 endFreezeEffect();
             }
@@ -980,7 +951,6 @@ public class PhonkEditClient implements ClientModInitializer {
         }
 
     int skullBaseSize = Math.max(1, Math.round(SKULL_RENDER_SIZE * (float)Math.max(0.1, Math.min(2.0, ModConfig.INSTANCE.skullScale))));
-    // Normalize skull size so it looks like GUI Scale 3 regardless of current scale
     double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
     double targetGuiScale = 3.0;
     int skullSize = Math.max(1, (int)Math.round(skullBaseSize * (targetGuiScale / Math.max(1.0, scaleFactor))));
@@ -1081,7 +1051,6 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     public static void activateFreezeEffect() {
-        // Local-only activation: picks random content and plays locally
         isFreezeModeActive = true;
         freezeActivationTime = System.currentTimeMillis();
         overrideSkullTexture = null;
@@ -1126,9 +1095,6 @@ public class PhonkEditClient implements ClientModInitializer {
             resetAnimationFor(selectedTexture);
         }
 
-        
-
-        // If the sound system hasn't started streaming yet, give it a short grace period
         if (manager.isPlaying() && !manager.isCurrentTrackPlaying()) {
             trackPlayWaitDeadline = System.currentTimeMillis() + TRACK_PLAY_GRACE_MS;
         } else {
@@ -1143,7 +1109,6 @@ public class PhonkEditClient implements ClientModInitializer {
         MinecraftClient mc = MinecraftClient.getInstance();
         boolean canNet = mc != null && mc.getNetworkHandler() != null;
         if (canNet) {
-            // Choose a track and skull image but don't activate locally; server will broadcast back
             var sel = PhonkManager.getInstance().pickRandomTrackAndPitch();
             Identifier chosenTexture = chooseSkullTextureForEvent(sel.event);
             byte[] skullPng = encodeSkullTextureToPng(chosenTexture);
@@ -1181,7 +1146,6 @@ public class PhonkEditClient implements ClientModInitializer {
 
     private static byte[] encodeSkullTextureToPng(Identifier id) {
         try {
-            // Prefer resource contents if available (for built-ins)
             ResourceManager rm = MinecraftClient.getInstance().getResourceManager();
             var opt = rm.getResource(id);
             if (opt.isPresent()) {
@@ -1191,7 +1155,6 @@ public class PhonkEditClient implements ClientModInitializer {
             }
         } catch (Exception ignored) {}
 
-        // Fallback: if this is a custom dynamic texture, dump its current image frame
         MinecraftClient mc = MinecraftClient.getInstance();
         TextureManager tm = mc.getTextureManager();
         var tex = tm.getTexture(id);
@@ -1199,7 +1162,6 @@ public class PhonkEditClient implements ClientModInitializer {
             NativeImage img = nibt.getImage();
             if (img != null) {
                 try {
-                    // NativeImage in this version lacks OutputStream write; write to temp file
                     java.nio.file.Path tmp = java.nio.file.Files.createTempFile("phonk-skull", ".png");
                     img.writeTo(tmp.toFile());
                     byte[] bytes = java.nio.file.Files.readAllBytes(tmp);
@@ -1214,13 +1176,10 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     public static void onActivateFromNetwork(String soundId, float pitch, byte[] skullPng) {
-        // Called from networking thread on client; schedule in main thread already
-        // Prepare override skull texture if provided
         Identifier dyn = null;
         if (skullPng != null && skullPng.length > 0) {
             dyn = registerDynamicSkull(skullPng);
         }
-        // Activate locally but play the specific track/pitch
         isFreezeModeActive = true;
         freezeActivationTime = System.currentTimeMillis();
         overrideSkullTexture = dyn;
@@ -1249,7 +1208,6 @@ public class PhonkEditClient implements ClientModInitializer {
     private static Identifier registerDynamicSkull(byte[] png) {
         try {
             NativeImage img = NativeImage.read(new java.io.ByteArrayInputStream(png));
-            // Scale to skull size for consistency
             NativeImage scaled = scaleToSquare(img, SKULL_TEXTURE_SIZE);
             img.close();
             NativeImageBackedTexture tex = new NativeImageBackedTexture(scaled);
@@ -1261,8 +1219,6 @@ public class PhonkEditClient implements ClientModInitializer {
             return null;
         }
     }
-
-    
 
     public static void endFreezeEffect() {
         isFreezeModeActive = false;
@@ -1335,7 +1291,7 @@ public class PhonkEditClient implements ClientModInitializer {
         if (!ModConfig.INSTANCE.enablePhonkEffect) return;
         if (!canTrigger()) return;
         if (isFreezeModeActive) return;
-        if (pendingEffectTime > 0) return; // Already scheduled
+        if (pendingEffectTime > 0) return;
         if (!force && Math.random() > ModConfig.INSTANCE.triggerChance) {
             return;
         }
@@ -1355,7 +1311,6 @@ public class PhonkEditClient implements ClientModInitializer {
             int w = client.getWindow().getFramebufferWidth();
             int h = client.getWindow().getFramebufferHeight();
 
-            // Attempt to call a NativeImage-returning takeScreenshot via reflection (if present in mappings)
             NativeImage image = null;
             try {
                 Class<?> sr = Class.forName("net.minecraft.client.util.ScreenshotRecorder");
@@ -1374,7 +1329,6 @@ public class PhonkEditClient implements ClientModInitializer {
             } catch (Throwable ignored) { }
 
             if (image == null) {
-                // Fallback: allocate and read pixels via framebuffer (if supported)
                 image = new NativeImage(w, h, false);
                 fb.beginRead();
                 image.loadFromTextureImage(0, false);
@@ -1396,10 +1350,6 @@ public class PhonkEditClient implements ClientModInitializer {
                 }
             }
 
-            // Do not flip vertically: both ScreenshotRecorder and framebuffer read
-            // produce correctly oriented images in 1.21.1 with drawTexture.
-
-            // Upload to a dynamic texture and keep id
             clearFreezeFrame();
             freezeTexture = new NativeImageBackedTexture(image);
             freezeTextureId = Identifier.of("phonkedit", "freeze_frame");

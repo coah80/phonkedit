@@ -8,14 +8,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import java.util.List;
 
-/**
- * Simple networking for syncing the freeze effect across players.
- *
- * Flow:
- * - Client selects a track/pitch and optional skull image PNG (256x256) and sends C2S_REQUEST
- * - Server rebroadcasts to all players in the same server with S2C_ACTIVATE
- * - Clients receiving S2C_ACTIVATE perform the effect locally and play the given track/pitch
- */
 public final class NetworkHandler {
     private static boolean TYPES_REGISTERED = false;
 
@@ -30,9 +22,7 @@ public final class NetworkHandler {
 
     public static void initServer() {
         ensureTypesRegistered();
-        // Listen for client requests and broadcast to everyone
         ServerPlayNetworking.registerGlobalReceiver(EffectSyncPayload.ID, (payload, context) -> {
-            // Broadcast to all players on the server thread
             context.server().execute(() -> broadcastActivate(context.server(), payload.soundId(), payload.pitch(), payload.imagePng().orElse(null)));
         });
     }
@@ -46,7 +36,6 @@ public final class NetworkHandler {
 
     public static void initClient() {
         ensureTypesRegistered();
-        // Register S2C handler to activate effect
         ClientPlayNetworking.registerGlobalReceiver(EffectSyncPayload.ID, (payload, context) -> {
             context.client().execute(() -> PhonkEditClient.onActivateFromNetwork(payload.soundId(), payload.pitch(), payload.imagePng().orElse(null)));
         });

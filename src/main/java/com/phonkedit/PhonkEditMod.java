@@ -15,7 +15,6 @@ public class PhonkEditMod implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Initializing Phonk Edit");
         ModConfig.load();
-        // Server-side networking init (safe on dedicated and integrated)
         NetworkHandler.initServer();
 
         if (!FabricLoader.getInstance().isModLoaded("modmenu") && !ModConfig.INSTANCE.modMenuDisclaimerShown) {

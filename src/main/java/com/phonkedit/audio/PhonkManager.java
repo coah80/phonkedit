@@ -79,14 +79,12 @@ public class PhonkManager {
     }
 
     public SoundInstance playTrackById(Identifier id, float pitch) {
-        // Find matching event across built-in + custom
         for (SoundEvent e : ModSounds.getAllPhonkSounds()) {
             Identifier eid = Registries.SOUND_EVENT.getId(e);
             if (eid != null && eid.equals(id)) {
                 return playTrack(e, pitch);
             }
         }
-        // Fallback: random if id not found
         PhonkEditMod.LOGGER.warn("Unknown sound id '{}', falling back to random", id);
         return playRandomTrack();
     }
@@ -110,7 +108,6 @@ public class PhonkManager {
     public boolean isCurrentTrackPlaying() {
         if (currentInstance == null) return false;
         MinecraftClient client = MinecraftClient.getInstance();
-        // Enforce 5s cutoff for custom songs: stop the sound but keep isPlaying flag
         if (currentIsCustom && customCutoffDeadlineMs > 0L && System.currentTimeMillis() >= customCutoffDeadlineMs) {
             client.getSoundManager().stop(currentInstance);
             return false;

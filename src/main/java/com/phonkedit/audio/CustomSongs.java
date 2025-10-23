@@ -22,13 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Supports custom songs managed like custom images:
- * - Copies built-in songs to .minecraft/config/phonkedit/songs on first run
- * - Builds/updates a resource pack at .minecraft/resourcepacks/phonkedit-custom-songs
- *   that mirrors files from the config songs folder
- * - Scans enabled resources for sounds.json entries under custom/* and returns them
- */
 public final class CustomSongs {
     private static final Gson GSON = new Gson();
     private static final List<SoundEvent> CUSTOM_SONG_EVENTS = new ArrayList<>();
@@ -92,7 +85,6 @@ public final class CustomSongs {
     }
 
     private static void generateOrUpdateResourcePack() throws IOException {
-        // Layout
         Path packMeta = GENERATED_PACK_DIR.resolve("pack.mcmeta");
         Path assetsDir = GENERATED_PACK_DIR.resolve("assets").resolve("phonkedit");
         Path customSoundsDir = assetsDir.resolve("sounds").resolve("custom");
@@ -100,14 +92,12 @@ public final class CustomSongs {
 
         Files.createDirectories(customSoundsDir);
 
-        // Clean custom sounds dir to avoid stale files
         try (var stream = Files.list(customSoundsDir)) {
             stream.forEach(path -> {
                 try { Files.deleteIfExists(path); } catch (IOException ignored) {}
             });
         }
 
-        // Copy/normalize from config songs
         List<String> resourceKeys = new ArrayList<>();
         try (var stream = Files.list(USER_SONGS_DIR)) {
             stream.filter(p -> {
@@ -128,7 +118,6 @@ public final class CustomSongs {
             });
         }
 
-        // Write sounds.json for custom entries
         JsonObject root = new JsonObject();
         for (String key : resourceKeys) {
             JsonObject def = new JsonObject();
@@ -144,7 +133,6 @@ public final class CustomSongs {
             w.write(GSON.toJson(root));
         }
 
-        // Write pack.mcmeta
         String meta = "{\n  \"pack\": {\n    \"pack_format\": 32,\n    \"description\": \"Phonk Edit - Custom Songs (generated)\"\n  }\n}\n";
         Files.writeString(packMeta, meta, StandardCharsets.UTF_8);
 
@@ -187,8 +175,6 @@ public final class CustomSongs {
     }
 
     public static boolean isCustom(SoundEvent event) {
-        // Instance comparison is sufficient because we expose the same instances
-        // via getCustomSongEvents() that ModSounds will return.
         return CUSTOM_SONG_EVENTS.contains(event);
     }
 }

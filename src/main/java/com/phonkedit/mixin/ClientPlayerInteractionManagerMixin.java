@@ -23,7 +23,7 @@ public class ClientPlayerInteractionManagerMixin {
     @Unique private ItemStack phonkedit$preInteractStack = ItemStack.EMPTY;
     @Unique private int phonkedit$preInteractCount = 0;
     @Unique private BlockPos phonkedit$predictedPlacePos = null;
-    
+
     @Inject(method = "breakBlock", at = @At("RETURN"))
     private void onBlockBroken(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue() && ModConfig.INSTANCE.triggerOnBlockBreak) {
@@ -37,7 +37,6 @@ public class ClientPlayerInteractionManagerMixin {
         phonkedit$preInteractStack = stack.isEmpty() ? ItemStack.EMPTY : stack.copy();
         phonkedit$preInteractCount = stack.isEmpty() ? 0 : stack.getCount();
 
-        // Predict the position where a block would be placed (clicked face offset)
         BlockPos clicked = hitResult.getBlockPos();
         phonkedit$predictedPlacePos = clicked.offset(hitResult.getSide());
     }
@@ -51,14 +50,12 @@ public class ClientPlayerInteractionManagerMixin {
 
         boolean placed = false;
 
-        // Non-creative: detect by item count decrease
         if (!player.getAbilities().creativeMode) {
             ItemStack after = player.getStackInHand(hand);
             int afterCount = after.isEmpty() ? 0 : after.getCount();
             placed = afterCount < phonkedit$preInteractCount;
         }
 
-        // Creative or fallback: check world state matches held block at predicted position
         if (!placed) {
             MinecraftClient mc = MinecraftClient.getInstance();
             ClientWorld world = mc.world;
