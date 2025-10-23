@@ -88,3 +88,4 @@ remapped_working/
 
 # Build reports
 build/reports/
+.github/instructions/hi.instructions.md
