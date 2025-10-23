@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security issue
+    url: https://github.com/coah80/phonkedit/security/policy
+    about: Use this link to report security vulnerabilities.
