@@ -130,5 +130,27 @@
         "stream": true
       }
     ]
+  },
+  "phonk13": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk13",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "phonk14": {
+    "subtitle": "Phonk music plays",
+    "sounds": [
+      {
+        "name": "phonkedit:phonk/phonk14",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
   }
 }

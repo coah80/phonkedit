@@ -38,9 +38,11 @@ public final class NetworkHandler {
             if (PhonkCurseState.get(server).isCurseBroken()) {
                 return;
             }
-            ServerFreezeState.protectDamageForMillis(Long.MAX_VALUE);
-            if (!server.isDedicated() && ModConfig.INSTANCE.pauseServerDuringEffect) {
-                ServerFreezeState.freezeWorldForMillis(Long.MAX_VALUE);
+            if (!ModConfig.INSTANCE.hardcoreMode) {
+                ServerFreezeState.protectDamageForMillis(Long.MAX_VALUE);
+                if (!server.isDedicated() && ModConfig.INSTANCE.pauseServerDuringEffect) {
+                    ServerFreezeState.freezeWorldForMillis(Long.MAX_VALUE);
+                }
             }
             broadcast(server, payload.soundId(), payload.pitch(), payload.imagePng().orElse(null));
         }));

@@ -784,7 +784,7 @@ public class PhonkEditClient implements ClientModInitializer {
 
             tickCustomTextureAnimations();
 
-            if (isFreezeModeActive) {
+            if (isFreezeModeActive && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
                 if (client.isPaused() || client.currentScreen instanceof net.minecraft.client.gui.screen.GameMenuScreen) {
                     client.setScreen(null);
                 }
@@ -810,7 +810,7 @@ public class PhonkEditClient implements ClientModInitializer {
                     }
                 }
 
-                if (isFreezeModeActive && client.player != null) {
+                if (isFreezeModeActive && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode && client.player != null) {
                     client.player.setVelocity(0.0, 0.0, 0.0);
                     if (client.player.input != null) {
                         client.player.input.movementForward = 0.0f;

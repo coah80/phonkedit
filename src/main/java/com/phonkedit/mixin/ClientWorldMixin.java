@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientWorldMixin {
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void phonkedit$cancelWorldTick(CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive()) ci.cancel();
+        if (PhonkEditClient.isFreezeModeActive() && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) ci.cancel();
     }
 
     @Inject(method = "tickEntities", at = @At("HEAD"), cancellable = true)
     private void phonkedit$cancelEntityTick(CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive()) ci.cancel();
+        if (PhonkEditClient.isFreezeModeActive() && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) ci.cancel();
     }
 }

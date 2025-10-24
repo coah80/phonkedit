@@ -15,7 +15,7 @@ public abstract class MouseMixin {
 
     @Inject(method = "updateMouse", at = @At("HEAD"), cancellable = true)
     private void phonkedit$lockCamera(CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect) {
+        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             this.cursorDeltaX = 0;
             this.cursorDeltaY = 0;
             ci.cancel();
@@ -24,14 +24,14 @@ public abstract class MouseMixin {
 
     @Inject(method = "onCursorPos", at = @At("HEAD"), cancellable = true)
     private void phonkedit$eatCursorMove(long window, double x, double y, CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect) {
+        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             ci.cancel();
         }
     }
 
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
     private void phonkedit$noScroll(long window, double horiz, double vert, CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect) {
+        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             ci.cancel();
         }
     }

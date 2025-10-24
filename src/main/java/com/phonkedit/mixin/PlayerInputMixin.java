@@ -22,7 +22,7 @@ public class PlayerInputMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void phonkedit$haltInput(CallbackInfo ci) {
-        if (!PhonkEditClient.isFreezeModeActive()) {
+        if (!PhonkEditClient.isFreezeModeActive() || com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             return;
         }
 

@@ -12,14 +12,14 @@ public class ClientPlayerEntityMixin {
 
     @Inject(method = "tickMovement", at = @At("HEAD"), cancellable = true)
     private void phonkedit$freezeMovement(CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive()) {
+        if (PhonkEditClient.isFreezeModeActive() && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             ci.cancel();
         }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void phonkedit$zeroHorizontalVelocity(CallbackInfo ci) {
-        if (!PhonkEditClient.isFreezeModeActive()) {
+        if (!PhonkEditClient.isFreezeModeActive() || com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) {
             return;
         }
 

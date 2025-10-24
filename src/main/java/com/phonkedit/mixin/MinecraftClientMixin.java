@@ -19,6 +19,6 @@ public class MinecraftClientMixin {
 
     @Inject(method = "handleInputEvents", at = @At("HEAD"), cancellable = true)
     private void phonkedit$cancelInput(CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive()) ci.cancel();
+        if (PhonkEditClient.isFreezeModeActive() && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode) ci.cancel();
     }
 }

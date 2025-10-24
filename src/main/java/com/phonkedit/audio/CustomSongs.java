@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
+import com.phonkedit.config.ModConfig;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.sound.SoundEvent;
@@ -36,9 +37,16 @@ public final class CustomSongs {
 
     public static SoundEvent[] getCurrentPhonkSoundEvents(SoundEvent[] builtin) {
         Identifier[] ids = discoveredSoundIds;
-        if (ids.length == 0) return builtin;
-        List<SoundEvent> events = new ArrayList<>(ids.length);
+    boolean onlyCustom = ModConfig.INSTANCE.onlyUseCustomSongs;
+        if (ids.length == 0) {
+            if (onlyCustom) return new SoundEvent[0];
+            return builtin;
+        }
+        List<SoundEvent> events = new ArrayList<>(ids.length + (onlyCustom ? 0 : builtin.length));
         for (Identifier id : ids) events.add(SoundEvent.of(id));
+        if (!onlyCustom) {
+            for (SoundEvent b : builtin) events.add(b);
+        }
         return events.toArray(new SoundEvent[0]);
     }
 
@@ -83,7 +91,7 @@ public final class CustomSongs {
             Path assetsRoot = packRoot.resolve("assets").resolve("phonkedit");
             Path soundsDir = assetsRoot.resolve("sounds");
             Files.createDirectories(soundsDir);
-            String readme = "How to add custom songs (2025-10-24)\r\n\r\n" +
+        String readme = "How to add custom songs (2025-10-24)\r\n\r\n" +
                     "1) Create your own resource pack (zip or folder inside resourcepacks).\r\n" +
                     "2) Inside it, create these paths:\r\n" +
                     "   assets/phonkedit/sounds.json\r\n \r\n" +
@@ -97,6 +105,7 @@ public final class CustomSongs {
                     "5) Enable your pack in Options -> Resource Packs.\r\n" +
                     "6) Trigger the Phonk effect; the mod prefers keys starting with custom/.\r\n\r\n" +
                     "Tips:\r\n" +
+            "- Use an audio editor like Audacity, FL Studio, or Adobe Audition to export .ogg files.\r\n" +
                     "- Names in sounds.json map to files under assets/phonkedit/sounds/.\r\n" +
                     "- Use stream: true in your entries for long tracks.\r\n" +
                     "- Keep filenames lowercase and avoid spaces.\r\n";

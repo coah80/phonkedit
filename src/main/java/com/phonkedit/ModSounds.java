@@ -19,7 +19,9 @@ public class ModSounds {
     public static final SoundEvent PHONK10 = registerSound("phonk10");
     public static final SoundEvent PHONK11 = registerSound("phonk11");
     public static final SoundEvent PHONK12 = registerSound("phonk12");
-    private static final SoundEvent[] BUILTIN = new SoundEvent[]{PHONK1, PHONK2, PHONK3, PHONK4, PHONK5, PHONK6, PHONK7, PHONK8, PHONK9, PHONK10, PHONK11, PHONK12};
+    public static final SoundEvent PHONK13 = registerSound("phonk13");
+    public static final SoundEvent PHONK14 = registerSound("phonk14");
+    private static final SoundEvent[] BUILTIN = new SoundEvent[]{PHONK1, PHONK2, PHONK3, PHONK4, PHONK5, PHONK6, PHONK7, PHONK8, PHONK9, PHONK10, PHONK11, PHONK12, PHONK13, PHONK14};
 
     private static SoundEvent registerSound(String name) {
         Identifier id = Identifier.of("phonkedit", name);

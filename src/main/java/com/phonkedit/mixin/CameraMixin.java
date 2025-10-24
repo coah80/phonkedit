@@ -26,7 +26,7 @@ public class CameraMixin {
     
     @Inject(method = "update", at = @At("HEAD"))
     private void onUpdateStart(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
-        boolean freezeCamera = PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect;
+    boolean freezeCamera = PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode;
         if (freezeCamera) {
             if (!capturedRotation) {
                 frozenPitch = this.pitch;
@@ -40,7 +40,7 @@ public class CameraMixin {
     
     @Inject(method = "update", at = @At("RETURN"))
     private void onUpdateEnd(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
-        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && capturedRotation) {
+        if (PhonkEditClient.isFreezeModeActive() && ModConfig.INSTANCE.lockCameraDuringEffect && !com.phonkedit.config.ModConfig.INSTANCE.hardcoreMode && capturedRotation) {
             this.pitch = frozenPitch;
             this.yaw = frozenYaw;
         }

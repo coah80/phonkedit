@@ -21,7 +21,7 @@ public class ModConfig {
     public double shakeIntensity = 1.0;
     public double phonkPitchMin = 0.95;
     public double phonkPitchMax = 1.05;
-    public boolean mixBuiltinWithCustomSongs = true;
+    public boolean onlyUseCustomSongs = false;
     public boolean grayscaleFreezeFrame = true;
     public boolean darkenScreenDuringEffect = true;
     public boolean showCinematicBars = true;
@@ -51,6 +51,7 @@ public class ModConfig {
     public boolean pauseServerDuringEffect = true;
     public boolean lockMouseDuringEffect = true;
     public boolean lockCameraDuringEffect = true;
+    public boolean hardcoreMode = false;
     public boolean devDisablePauseOnLostFocus = false;
     public boolean devDontEndOnPause = false;
     public boolean modMenuDisclaimerShown = false;
