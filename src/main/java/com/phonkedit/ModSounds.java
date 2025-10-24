@@ -1,5 +1,7 @@
 package com.phonkedit;
 
+import com.phonkedit.audio.CustomSongs;
+import com.phonkedit.config.ModConfig;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
@@ -25,7 +27,7 @@ public class ModSounds {
     }
 
     public static void initialize() {
-        PhonkEditMod.LOGGER.info("Registered phonk sounds");
+        PhonkEditMod.LOGGER.info("Registered {} built-in phonk sounds", BUILTIN_SOUNDS.length);
     }
 
     public static SoundEvent[] getAllPhonkSounds() {

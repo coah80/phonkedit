@@ -13,7 +13,6 @@ repositories {
     maven { url 'https://maven.shedaniel.me/' }
     maven { url 'https://maven.terraformersmc.com/releases/' }
     maven { url 'https://maven.ladysnake.org/releases' }
-    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -21,10 +20,6 @@ dependencies {
     mappings "net.fabricmc:yarn:1.21.1+build.3:v2"
     modImplementation "net.fabricmc:fabric-loader:0.15.11"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.1"
-    
-    // Renderer library (earliest version for 1.21.1)
-    modImplementation include("io.github.0x3c50.renderer:renderer-fabric:1.2")
-    
     // Mod Menu API (for 1.21.1)
     modImplementation "com.terraformersmc:modmenu:11.0.1"
     
@@ -43,16 +38,26 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.release = 21
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
+}
+
+loom {
+    runs {
+        client2 {
+            client()
+            name "Minecraft Client 2"
+            runDir "run2"
+        }
+    }
 }
 
 jar {

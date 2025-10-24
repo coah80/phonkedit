@@ -917,6 +917,17 @@ public class PhonkEditClient implements ClientModInitializer {
             }
             pendingEffectTime = 0;
         });
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            onWorldJoin();
+        });
+
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            if (isFreezeModeActive) {
+                endFreezeEffect();
+            }
+            pendingEffectTime = 0;
+        });
     }
     
     public static void renderOverlayIfActive(DrawContext drawContext) {

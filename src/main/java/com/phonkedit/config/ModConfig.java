@@ -66,14 +66,44 @@ public class ModConfig {
                 PhonkEditMod.LOGGER.error("Failed to load config", e);
             }
         }
+        INSTANCE.normalize();
         save();
     }
 
     public static void save() {
         try {
+            INSTANCE.normalize();
             Files.writeString(CONFIG_PATH, GSON.toJson(INSTANCE));
         } catch (IOException e) {
             PhonkEditMod.LOGGER.error("Failed to save config", e);
         }
+    }
+
+    private void normalize() {
+        double min = Math.min(phonkPitchMin, phonkPitchMax);
+        double max = Math.max(phonkPitchMin, phonkPitchMax);
+        min = clampPitch(min);
+        max = clampPitch(max);
+
+        phonkPitchMin = min;
+        phonkPitchMax = max;
+
+        if (Math.abs(triggerChance - 0.10) < 1e-9) {
+            triggerChance = 0.50;
+        }
+        triggerChance = clamp(triggerChance, 0.0, 1.0);
+    skullBlurIntensity = clamp(skullBlurIntensity, 0.0, 5.0);
+        skullBlurEasePower = clamp(skullBlurEasePower, 0.1, 5.0);
+        airTimeThresholdSeconds = clamp(airTimeThresholdSeconds, 0.1, 10.0);
+        skullScale = clamp(skullScale, 0.1, 2.0);
+
+    }
+
+    private static double clampPitch(double value) {
+        return Math.max(0.5, Math.min(2.0, value));
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
