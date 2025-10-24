@@ -750,7 +750,7 @@ public class PhonkEditClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
     NetworkHandler.initClient(payload -> onActivateFromNetwork(payload.soundId(), payload.pitch(), payload.imagePng().orElse(null)), payload -> onCurseStatus(payload.curseBroken()), payload -> onTriggerSuggestion(payload.reason()));
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+    ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             @Override
             public Identifier getFabricId() {
                 return Identifier.of("phonkedit", "custom_songs_loader");
@@ -758,15 +758,11 @@ public class PhonkEditClient implements ClientModInitializer {
 
             @Override
             public void reload(net.minecraft.resource.ResourceManager manager) {
-                    CustomSongs.prepareAndReload(manager);
+                CustomSongs.onResourceReload(manager);
             }
         });
-            ClientLifecycleEvents.CLIENT_STARTED.register(client -> CustomSongs.initializeOnClientStart());
     PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
-    ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            reloadSkullTextureList();
-            CustomSongs.initializeOnClientStart();
-        });
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> reloadSkullTextureList());
         
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             renderOverlayIfActive(drawContext);
