@@ -762,7 +762,10 @@ public class PhonkEditClient implements ClientModInitializer {
             }
         });
     PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> reloadSkullTextureList());
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            reloadSkullTextureList();
+            CustomSongs.initializeOnClientStart();
+        });
         
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             renderOverlayIfActive(drawContext);
@@ -780,9 +783,11 @@ public class PhonkEditClient implements ClientModInitializer {
             }
 
             tickCustomTextureAnimations();
-            
-            if (isFreezeModeActive && client.isPaused() && !ModConfig.INSTANCE.devDontEndOnPause) {
-                endFreezeEffect();
+
+            if (isFreezeModeActive) {
+                if (client.isPaused() || client.currentScreen instanceof net.minecraft.client.gui.screen.GameMenuScreen) {
+                    client.setScreen(null);
+                }
             }
 
             if (pendingEffectTime > 0 && System.currentTimeMillis() >= pendingEffectTime) {

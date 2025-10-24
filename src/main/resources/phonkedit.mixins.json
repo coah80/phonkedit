@@ -5,12 +5,19 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ServerWorldMixin",
-    "LivingEntityMixin"
+    "LivingEntityMixin",
+    "MinecraftServerMixin"
   ],
   "client": [
     "MinecraftClientMixin",
     "ClientPlayerInteractionManagerMixin",
-    "MouseMixin"
+    "MouseMixin",
+    "CameraMixin",
+    "ClientPlayerEntityMixin",
+    "PlayerInputMixin",
+    "InGameHudMixin",
+    "ClientWorldMixin",
+    "ParticleMixin"
   ],
   "injectors": {
     "defaultRequire": 1
