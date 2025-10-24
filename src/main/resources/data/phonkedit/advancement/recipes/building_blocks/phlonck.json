@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_wither_skull": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:wither_skeleton_skull"
+            ]
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "phonkedit:phlonck"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_wither_skull",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "phonkedit:phlonck"
+    ]
+  }
+}

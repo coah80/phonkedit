@@ -1,0 +1,23 @@
+{
+  "parent": "phonkedit:tasks/it_starts",
+  "display": {
+    "icon": {
+      "id": "minecraft:wither_skeleton_skull"
+    },
+    "title": {
+      "text": "Skull Me Once"
+    },
+    "description": {
+      "text": "Shatter the phlonck's curse with a diamond sacrifice."
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "ritual_complete": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

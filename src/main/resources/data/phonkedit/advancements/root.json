@@ -1,0 +1,11 @@
+{
+  "criteria": {
+    "first_tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [["first_tick"]],
+  "rewards": {
+    "recipes": ["phonkedit:phlonck"]
+  }
+}
