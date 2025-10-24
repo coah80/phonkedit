@@ -88,14 +88,6 @@ public class PhonkManager {
         currentInstance = null;
         currentSoundEvent = null;
         isPlaying = false;
-        if (currentInstance != null) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            client.getSoundManager().stop(currentInstance);
-            currentInstance = null;
-        }
-        currentSoundEvent = null;
-        currentIsCustom = false;
-        customCutoffDeadlineMs = 0L;
     }
 
     private void playSelection(SoundEvent event, float pitch) {
@@ -124,17 +116,5 @@ public class PhonkManager {
         return sounds[random.nextInt(sounds.length)];
     }
 
-    public boolean isCurrentTrackPlaying() {
-        if (currentInstance == null) return false;
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (currentIsCustom && customCutoffDeadlineMs > 0L && System.currentTimeMillis() >= customCutoffDeadlineMs) {
-            client.getSoundManager().stop(currentInstance);
-            return false;
-        }
-        return client.getSoundManager().isPlaying(currentInstance);
-    }
-
-    public SoundEvent getCurrentSoundEvent() {
-        return currentSoundEvent;
-    }
+    
 }

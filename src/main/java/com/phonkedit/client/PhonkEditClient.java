@@ -758,11 +758,15 @@ public class PhonkEditClient implements ClientModInitializer {
 
             @Override
             public void reload(net.minecraft.resource.ResourceManager manager) {
-                CustomSongs.prepareAndReload(manager);
+                    CustomSongs.prepareAndReload(manager);
             }
         });
+            ClientLifecycleEvents.CLIENT_STARTED.register(client -> CustomSongs.initializeOnClientStart());
     PhonkEditMod.LOGGER.info("Phonk Edit client initialized");
-    ClientLifecycleEvents.CLIENT_STARTED.register(client -> reloadSkullTextureList());
+    ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            reloadSkullTextureList();
+            CustomSongs.initializeOnClientStart();
+        });
         
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             renderOverlayIfActive(drawContext);

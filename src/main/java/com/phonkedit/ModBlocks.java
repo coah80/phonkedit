@@ -7,20 +7,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 public final class ModBlocks {
-    public static final Block PHLONCK = register("phlonck", new PhlonckBlock(Block.Settings.copy(Blocks.DIAMOND_BLOCK).ticksRandomly().sounds(new BlockSoundGroup(
-        1.0f,
-        1.0f,
-        SoundEvent.of(Identifier.ofVanilla("block.diamond_block.break")),
-        SoundEvent.of(Identifier.ofVanilla("block.diamond_block.step")),
-        SoundEvent.of(Identifier.ofVanilla("block.soul_sand.place")),
-        SoundEvent.of(Identifier.ofVanilla("block.diamond_block.hit")),
-        SoundEvent.of(Identifier.ofVanilla("block.diamond_block.fall"))
-    ))));
+    public static final Block PHLONCK = register("phlonck", new PhlonckBlock(Block.Settings.copy(Blocks.BONE_BLOCK).ticksRandomly()));
 
     private ModBlocks() {
     }

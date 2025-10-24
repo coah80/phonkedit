@@ -1,7 +1,6 @@
 package com.phonkedit;
 
 import com.phonkedit.audio.CustomSongs;
-import com.phonkedit.config.ModConfig;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
@@ -20,6 +19,7 @@ public class ModSounds {
     public static final SoundEvent PHONK10 = registerSound("phonk10");
     public static final SoundEvent PHONK11 = registerSound("phonk11");
     public static final SoundEvent PHONK12 = registerSound("phonk12");
+    private static final SoundEvent[] BUILTIN = new SoundEvent[]{PHONK1, PHONK2, PHONK3, PHONK4, PHONK5, PHONK6, PHONK7, PHONK8, PHONK9, PHONK10, PHONK11, PHONK12};
 
     private static SoundEvent registerSound(String name) {
         Identifier id = Identifier.of("phonkedit", name);
@@ -27,10 +27,10 @@ public class ModSounds {
     }
 
     public static void initialize() {
-        PhonkEditMod.LOGGER.info("Registered {} built-in phonk sounds", BUILTIN_SOUNDS.length);
+        PhonkEditMod.LOGGER.info("Registered {} built-in phonk sounds", BUILTIN.length);
     }
 
     public static SoundEvent[] getAllPhonkSounds() {
-        return new SoundEvent[]{PHONK1, PHONK2, PHONK3, PHONK4, PHONK5, PHONK6, PHONK7, PHONK8, PHONK9, PHONK10, PHONK11, PHONK12};
+        return CustomSongs.getCurrentPhonkSoundEvents(BUILTIN);
     }
 }
