@@ -1,7 +1,6 @@
 {
   "variants": {
-    "": {
-      "model": "phonkedit:block/phlonck"
-    }
+    "": { "model": "phonkedit:block/phlonck" }
   }
 }
+

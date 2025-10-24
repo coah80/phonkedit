@@ -27,10 +27,16 @@ import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.vehicle.AbstractMinecartEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.component.DataComponentTypes;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -94,6 +100,10 @@ public class PhonkEditClient implements ClientModInitializer {
     private static CustomTexture customSpecialSkull = null;
     private static Identifier currentSpecialSkullTexture = SPECIAL_SKULL_PHONK6;
     private static Identifier overrideSkullTexture = null;
+    private static boolean curseBroken = false;
+    private static boolean wasUsingItemLastTick = false;
+    private static boolean wasSleepingLastTick = false;
+    private static boolean ridingTargetVehicleLastTick = false;
 
     private static void reloadSkullTextureList() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -735,10 +745,11 @@ public class PhonkEditClient implements ClientModInitializer {
     private static boolean wasOnGroundLastTick = true;
     private static long airStartTimeMs = 0L;
     private static boolean airTriggerConsumed = false;
+    private static boolean wasEatingFoodLastTick = false;
 
     @Override
     public void onInitializeClient() {
-        NetworkHandler.initClient();
+    NetworkHandler.initClient(payload -> onActivateFromNetwork(payload.soundId(), payload.pitch(), payload.imagePng().orElse(null)), payload -> onCurseStatus(payload.curseBroken()), payload -> onTriggerSuggestion(payload.reason()));
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             @Override
             public Identifier getFabricId() {
@@ -754,9 +765,6 @@ public class PhonkEditClient implements ClientModInitializer {
     ClientLifecycleEvents.CLIENT_STARTED.register(client -> reloadSkullTextureList());
         
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
-            if (MinecraftClient.getInstance().currentScreen != null) {
-                return;
-            }
             renderOverlayIfActive(drawContext);
         });
 
@@ -854,13 +862,60 @@ public class PhonkEditClient implements ClientModInitializer {
                     }
                 }
                 wasOnGroundLastTick = onGround;
+
+                boolean usingItem = client.player.isUsingItem();
+                boolean eatingThisTick = false;
+                if (usingItem) {
+                    Hand hand = client.player.getActiveHand();
+                    if (hand != null) {
+                        ItemStack stack = client.player.getStackInHand(hand);
+                        if (!stack.isEmpty() && stack.getComponents().contains(DataComponentTypes.FOOD)) {
+                            eatingThisTick = true;
+                        }
+                    }
+                }
+                if (!usingItem && wasUsingItemLastTick && wasEatingFoodLastTick) {
+                    onFoodStarted();
+                }
+                wasEatingFoodLastTick = eatingThisTick;
+                wasUsingItemLastTick = usingItem;
+
+                boolean sleeping = client.player.isSleeping();
+                if (sleeping && !wasSleepingLastTick) {
+                    onBedUsed();
+                }
+                wasSleepingLastTick = sleeping;
+
+                boolean ridingTarget = false;
+                Entity vehicle = client.player.getVehicle();
+                if (vehicle instanceof BoatEntity || vehicle instanceof AbstractMinecartEntity) {
+                    ridingTarget = true;
+                }
+                if (ridingTarget && !ridingTargetVehicleLastTick) {
+                    onVehicleMounted();
+                }
+                ridingTargetVehicleLastTick = ridingTarget;
             } else {
                 lastHealthInitialized = false;
                 wasBelowLowHealth = false;
                 wasOnGroundLastTick = true;
                 airStartTimeMs = 0L;
                 airTriggerConsumed = false;
+                wasUsingItemLastTick = false;
+                wasSleepingLastTick = false;
+                ridingTargetVehicleLastTick = false;
             }
+        });
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            onWorldJoin();
+        });
+
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            if (isFreezeModeActive) {
+                endFreezeEffect();
+            }
+            pendingEffectTime = 0;
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
@@ -1106,6 +1161,9 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     private static void triggerSyncedOrLocal() {
+        if (curseBroken) {
+            return;
+        }
         MinecraftClient mc = MinecraftClient.getInstance();
         boolean canNet = mc != null && mc.getNetworkHandler() != null;
         if (canNet) {
@@ -1235,6 +1293,10 @@ public class PhonkEditClient implements ClientModInitializer {
 
     PhonkManager.getInstance().stopAll();
     clearFreezeFrame();
+        // Notify server to end any protection/pause windows tied to the effect
+        try {
+            NetworkHandler.sendEndEffectToServer();
+        } catch (Throwable ignored) {}
         PhonkEditMod.LOGGER.info("Ended freeze effect");
     }
 
@@ -1254,14 +1316,18 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     public static void onWorldJoin() {
-    worldJoinTime = System.currentTimeMillis();
-    pendingEffectTime = 0;
-    hasPreservedVelocity = false;
-    preservedVelocity = Vec3d.ZERO;
-    preservedSprinting = false;
-    wasOnGroundLastTick = true;
-    airStartTimeMs = 0L;
-    airTriggerConsumed = false;
+        worldJoinTime = System.currentTimeMillis();
+        pendingEffectTime = 0;
+        curseBroken = false;
+        hasPreservedVelocity = false;
+        preservedVelocity = Vec3d.ZERO;
+        preservedSprinting = false;
+        wasOnGroundLastTick = true;
+        airStartTimeMs = 0L;
+        airTriggerConsumed = false;
+        wasUsingItemLastTick = false;
+        wasSleepingLastTick = false;
+        ridingTargetVehicleLastTick = false;
     }
 
     public static boolean canTrigger() {
@@ -1279,7 +1345,41 @@ public class PhonkEditClient implements ClientModInitializer {
         if (!ModConfig.INSTANCE.triggerOnBlockPlace) {
             return;
         }
-        // Respect triggerChance for placements
+        scheduleEffect(false);
+    }
+
+    public static void onLeverUsed() {
+        if (!ModConfig.INSTANCE.triggerOnLeverUse) {
+            return;
+        }
+        scheduleEffect(false);
+    }
+
+    public static void onDoorUsed() {
+        if (!ModConfig.INSTANCE.triggerOnDoorUse) {
+            return;
+        }
+        scheduleEffect(false);
+    }
+
+    public static void onVehicleMounted() {
+        if (!ModConfig.INSTANCE.triggerOnVehicleMount) {
+            return;
+        }
+        scheduleEffect(false);
+    }
+
+    public static void onFoodStarted() {
+        if (!ModConfig.INSTANCE.triggerOnEatFood) {
+            return;
+        }
+        scheduleEffect(false);
+    }
+
+    public static void onBedUsed() {
+        if (!ModConfig.INSTANCE.triggerOnUseBed) {
+            return;
+        }
         scheduleEffect(false);
     }
 
@@ -1288,6 +1388,7 @@ public class PhonkEditClient implements ClientModInitializer {
     }
 
     private static void scheduleEffect(boolean force) {
+        if (curseBroken) return;
         if (!ModConfig.INSTANCE.enablePhonkEffect) return;
         if (!canTrigger()) return;
         if (isFreezeModeActive) return;
@@ -1335,6 +1436,17 @@ public class PhonkEditClient implements ClientModInitializer {
                 fb.endRead();
             }
 
+            int half = h / 2;
+            for (int y = 0; y < half; y++) {
+                int opposite = h - 1 - y;
+                for (int x = 0; x < w; x++) {
+                    int c1 = image.getColor(x, y);
+                    int c2 = image.getColor(x, opposite);
+                    image.setColor(x, y, c2);
+                    image.setColor(x, opposite, c1);
+                }
+            }
+
             if (ModConfig.INSTANCE.grayscaleFreezeFrame) {
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++) {
@@ -1374,6 +1486,30 @@ public class PhonkEditClient implements ClientModInitializer {
         freezeTexture = null;
         freezeTextureId = null;
         freezeTexWidth = 0; freezeTexHeight = 0;
+    }
+
+    private static void onCurseStatus(boolean broken) {
+        curseBroken = broken;
+        if (broken) {
+            pendingEffectTime = 0;
+        }
+    }
+
+    private static void onTriggerSuggestion(String reason) {
+        if (curseBroken) {
+            return;
+        }
+        boolean allowed = switch (reason) {
+            case "boss:dragon" -> ModConfig.INSTANCE.triggerOnDragonKill;
+            case "boss:wither" -> ModConfig.INSTANCE.triggerOnWitherKill;
+            case "boss:warden" -> ModConfig.INSTANCE.triggerOnWardenKill;
+            case "boss:elder_guardian" -> ModConfig.INSTANCE.triggerOnElderGuardianKill;
+            default -> false;
+        };
+        if (!allowed) {
+            return;
+        }
+        scheduleEffect(false);
     }
 
     private static final class CustomTexture {

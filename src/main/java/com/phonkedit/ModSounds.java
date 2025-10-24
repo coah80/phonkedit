@@ -21,12 +21,6 @@ public class ModSounds {
     public static final SoundEvent PHONK11 = registerSound("phonk11");
     public static final SoundEvent PHONK12 = registerSound("phonk12");
 
-    private static final SoundEvent[] BUILTIN_SOUNDS = new SoundEvent[] {
-        PHONK1, PHONK2, PHONK3, PHONK4, PHONK5,
-        PHONK6, PHONK7, PHONK8, PHONK9, PHONK10,
-        PHONK11, PHONK12
-    };
-
     private static SoundEvent registerSound(String name) {
         Identifier id = Identifier.of("phonkedit", name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
@@ -37,19 +31,6 @@ public class ModSounds {
     }
 
     public static SoundEvent[] getAllPhonkSounds() {
-        var custom = CustomSongs.getCustomSongEvents();
-        if (!custom.isEmpty()) {
-            if (ModConfig.INSTANCE.mixBuiltinWithCustomSongs) {
-                SoundEvent[] combined = new SoundEvent[BUILTIN_SOUNDS.length + custom.size()];
-                System.arraycopy(BUILTIN_SOUNDS, 0, combined, 0, BUILTIN_SOUNDS.length);
-                for (int i = 0; i < custom.size(); i++) {
-                    combined[BUILTIN_SOUNDS.length + i] = custom.get(i);
-                }
-                return combined;
-            } else {
-                return custom.toArray(new SoundEvent[0]);
-            }
-        }
-        return BUILTIN_SOUNDS.clone();
+        return new SoundEvent[]{PHONK1, PHONK2, PHONK3, PHONK4, PHONK5, PHONK6, PHONK7, PHONK8, PHONK9, PHONK10, PHONK11, PHONK12};
     }
 }

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "phonkedit",
   "version": "${version}",
-  "name": "YouTube Shorts Phonk Edit",
-  "description": "youtube shorts phonk skull edit thing but in minecraft lol\n\nGod why did i spend so much time on this.",
+  "name": "Phonk Edit",
+  "description": "its the youtube shorts skull phonk edits, but in minecraft!\n\nGod why did i spend so much time on this",
   "authors": ["coah"],
   "contact": {
     "sources": "https://github.com/coah80/phonkedit"
