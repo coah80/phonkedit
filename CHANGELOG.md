@@ -1,5 +1,59 @@
 # Changelog
 
+## [2.1.1] - 2025-10-24
+
+### Highlights
+
+- Custom songs via resource packs: discovery is resource-pack-only. Scans enabled packs for `assets/phonkedit/sounds.json` and prefers keys under `custom/`.
+- New toggle: “Only Use Custom Songs” to play only custom tracks when present.
+- Auto-generated tutorial pack: “PhonkEdit-CustomSongs” with a HOW TO and example `sounds.json` to help you add custom audio.
+- Comprehensive freeze: fully locks inputs, camera, mouse, and client world; singleplayer server is paused until the effect explicitly ends; pause menu is auto-closed during the effect.
+- Hardcore Mode toggle: disables world pausing and all movement/camera locks for players who want zero control interference.
+- Added two new built-in tracks: `phonk13` and `phonk14`.
+- Default Trigger Chance set to 0.30.
+- Ritual UX: replaced the mid-ritual overlay/effect with a global title/subtitle “Curse broken” for all players.
+- Stability and UX fixes across overlays, triggers, rendering, and localization.
+
+### Custom songs
+
+- Removed the previous config-driven user media pack approach; discovery is now scan-only from enabled resource packs.
+- Prefers keys under `custom/` within `assets/phonkedit/sounds.json` so users can override cleanly without touching built-ins.
+- Added a tutorial resource pack named “PhonkEdit-CustomSongs” (generated into your resourcepacks folder) including:
+  - A HOW TO guide explaining where to put files and how to name sound keys.
+  - An example `sounds.json` with `custom/bruh` and `custom/hahahafunisong` entries.
+- New setting “Only Use Custom Songs” swaps between custom-only playback and mixing with built-ins.
+
+### Freeze, input lock, and safety
+
+- Client: blocks handleInputEvents, mouse move/scroll, player movement/jump, camera updates, world and particle ticks during the effect.
+- Server: singleplayer server ticking is paused until the effect ends; damage protection active for the effect’s duration.
+- Auto-closes the pause menu while the effect is active to prevent early unpause exploits.
+- Hardcore Mode disables all the above locking and pausing for players who prefer uninterrupted control.
+
+### Audio
+
+- New built-in tracks: `phonk13` and `phonk14`; wired into `assets/phonkedit/sounds.json` and registries.
+- Added a helper script `scripts/ffmpeg_reduce_gain.py` to reduce built-in track gain by −10 dB (skips `phonk6`).
+
+### UX and defaults
+
+- Default Trigger Chance is now 0.30.
+- Phlonck block uses bone block sound set for more fitting audio.
+- Ritual completion shows a global title/subtitle “Curse broken”.
+
+### Fixes and polish
+
+- Fixed overlay inversion and improved top-layer HUD ordering.
+- Fixed early unpause: effect explicitly controls start/end; world stays paused in SP until end (unless Hardcore Mode).
+- Input/camera/mouse lock reliability improved; closes pause menu during effect in SP.
+- Triggers corrected for vehicle mounting, bed use, and eating; all respect chance and active-state guards.
+- Creative tab visibility, asset localization, texture/model registrations, and advancement text corrected.
+- Crash fix: corrected a mixin injection signature by changing a parameter type to the proper `PlayerEntity`.
+
+### Internal / dev tooling
+
+- Added `scripts/ffmpeg_reduce_gain.py` and verified FFmpeg flow for batch gain reduction of built-ins (excludes `phonk6`).
+
 ## [2.0.1] - 2025-10-22
 
 ### Fixes and polish
