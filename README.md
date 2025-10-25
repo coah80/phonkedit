@@ -1,5 +1,7 @@
 # Phonk Edit
 
+yes i used ai for this readme
+
 Phonk Edit is a Fabric mod that adds short "phonk edit" audio/visual effects (skulls, freeze-frame, shake, and short phonk tracks) to Minecraft gameplay.
 
 Quick reference — everything an end user needs to install, run, build, and report issues.
