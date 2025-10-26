@@ -63,6 +63,8 @@ import org.w3c.dom.Node;
 @Environment(EnvType.CLIENT)
 public class PhonkEditClient implements ClientModInitializer {
     
+    public static boolean skipNextDisclaimerCheck = false;
+    
     private static final Identifier[] BUILTIN_SKULL_TEXTURES = {
         Identifier.of("phonkedit", "textures/gui/skull1.png"),
         Identifier.of("phonkedit", "textures/gui/skull2.png"),

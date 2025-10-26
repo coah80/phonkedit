@@ -55,8 +55,6 @@ public class PhonkEditMod implements ModInitializer {
 
         if (!FabricLoader.getInstance().isModLoaded("modmenu") && !ModConfig.INSTANCE.modMenuDisclaimerShown) {
             LOGGER.warn("Phonk Edit: Mod Menu not detected. Install Mod Menu for the full configuration UI or continue using the bundled fallback screen.");
-            ModConfig.INSTANCE.modMenuDisclaimerShown = true;
-            ModConfig.save();
         }
 
         ModSounds.initialize();

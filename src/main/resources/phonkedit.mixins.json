@@ -17,7 +17,8 @@
     "PlayerInputMixin",
     "InGameHudMixin",
     "ClientWorldMixin",
-    "ParticleMixin"
+    "ParticleMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
