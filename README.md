@@ -66,6 +66,7 @@ Developer tips
 - If the build can't find Java, set JAVA_HOME to your JDK install and ensure java -version reports a supported JDK.
 - For IDEs: import the project as a Gradle project (the wrapper will handle toolchains).
 - If you hit dependency or environment errors, try a clean build: ./gradlew clean build
+- Multi-version builds: use the Stonecutter CLI (`stonecutter active <mc-version>`) before running Gradle tasks if you need to switch off the default (1.21.1).
 
 If something goes wrong
 - Ensure Fabric API and the right Java version are installed.
