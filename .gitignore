@@ -1,10 +1,11 @@
 # build files
-/.gradle/
+.gradle/
 build/
 out/
 .loom-cache/
 remapped_mods/
 run/
+run2/
 
 # keep gradle wrapper
 !/gradle/wrapper/gradle-wrapper.jar
@@ -13,10 +14,11 @@ run/
 /.idea/
 *.iml
 .vscode/
+*.code-workspace
 .history/
 
 # more gradle files
-local.properties
+gradle-local.properties
 
 # macos/windows stuff
 .DS_Store
@@ -46,6 +48,7 @@ shaderpacks/
 saves/
 resourcepacks/
 config/
+!/src/**/config/
 
 # compiled
 *.class

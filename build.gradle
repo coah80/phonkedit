@@ -1,4 +1,5 @@
 plugins {
+    id 'net.saliman.properties' version '1.6.0'
     id 'fabric-loom' version '1.11.8'
     id 'maven-publish'
 }
