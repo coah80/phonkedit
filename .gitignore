@@ -18,6 +18,7 @@ run2/
 .history/
 
 # more gradle files
+local.properties
 gradle-local.properties
 
 # macos/windows stuff
@@ -48,6 +49,8 @@ shaderpacks/
 saves/
 resourcepacks/
 config/
+!/src/**/config/
+!/src/**/config/**
 !/src/**/config/
 
 # compiled
