@@ -1,53 +1,39 @@
-# Gradle
-.gradle/
+# build files
+/.gradle/
 build/
 out/
-classes/
-!gradle/wrapper/gradle-wrapper.jar
-.gradle-cache/
-gradle-app.setting
+.loom-cache/
+remapped_mods/
+run/
 
-# Eclipse
-*.launch
-.settings/
-.metadata
-.classpath
-.project
-bin/
-.factorypath
+# keep gradle wrapper
+!/gradle/wrapper/gradle-wrapper.jar
 
-# IntelliJ IDEA
-.idea/
+# ide
+/.idea/
 *.iml
-*.ipr
-*.iws
-out/
-
-# VSCode
 .vscode/
-*.code-workspace
 .history/
 
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
+# more gradle files
+local.properties
 
-# Windows
+# macos/windows stuff
+.DS_Store
 Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
 Desktop.ini
 
-# fabric
-run/
-remapped/
-
-# Minecraft Client
+# logs
 *.log
 logs/
 crash-reports/
+*.tmp
+*.bak
+*.swp
+*~
+*.orig
+
+# minecraft stuff
 usercache.json
 usernamecache.json
 options.txt
@@ -61,31 +47,13 @@ saves/
 resourcepacks/
 config/
 
-# Development artifacts
+# compiled
 *.class
+/build/libs/
 *.jar
-!gradle-wrapper.jar
 *.war
 *.ear
-*.zip
-*.tar.gz
-*.rar
 
-# Temporary files
-*.tmp
-*.bak
-*.swp
-*~
-*.orig
-
-# Personal/Local Gradle config
-gradle.properties
-
-# Loom cache and remapping
-.loom-cache/
-remapped_mods/
-remapped_working/
-
-# Build reports
-build/reports/
+# ide run folders
+bin/
 .github/instructions/hi.instructions.md
